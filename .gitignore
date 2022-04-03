@@ -21,6 +21,7 @@
 *.json
 *.cfg
 !cfg/yolov3*.cfg
+2.4.1'
 
 runs/*
 
