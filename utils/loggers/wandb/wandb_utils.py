@@ -161,7 +161,7 @@ class WandbLogger():
         elif self.wandb:
             self.wandb_run = wandb.init(config=opt,
                                         resume="allow",
-                                        project='yolov5-abandonedobjectdetect' if opt.project == 'runs/train' else Path(opt.project).stem,
+                                        project='train' if opt.project == 'runs/train' else Path(opt.project).stem,
                                         entity=opt.entity,
                                         name=opt.name if opt.name != 'exp' else None,
                                         job_type=job_type,
