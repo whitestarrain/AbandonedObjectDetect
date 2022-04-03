@@ -190,7 +190,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         # 讲预测结果应用到图片上
         for i, det in enumerate(pred):  # per image
             seen += 1
-            if webcam:  # # 如果输入源是webcam，则batch_size不为1，取出dataset中的一张图片
+            if webcam:  # 如果输入源是webcam，则batch_size不为1，取出dataset中的一张图片
                 p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
             else:
                 p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
