@@ -248,12 +248,16 @@ class Model(nn.Module):
 
 def parse_model(d, ch):  # model_dict, input_channels(3)
     LOGGER.info('\n%3s%18s%3s%10s  %-40s%-30s' % ('', 'from', 'n', 'params', 'module', 'arguments'))
+    # 获取 anchor, nc, gd, gw（‘depth_multiple’控制所有层的通道数，'width_multiple'控制BottleneckCSP里的卷积的个数）
     anchors, nc, gd, gw = d['anchors'], d['nc'], d['depth_multiple'], d['width_multiple']
     na = (len(anchors[0]) // 2) if isinstance(anchors, list) else anchors  # number of anchors
     no = na * (nc + 5)  # number of outputs = anchors * (classes + 5)
 
+    # 网络结构列表，保存列表，输出特征图通道列表
     layers, save, c2 = [], [], ch[-1]  # layers, savelist, ch out
+    # 依据backbone和head来搭建网络
     for i, (f, n, m, args) in enumerate(d['backbone'] + d['head']):  # from, number, module, args
+        # eval将字符串转为 基本操作
         m = eval(m) if isinstance(m, str) else m  # eval strings
         for j, a in enumerate(args):
             try:
