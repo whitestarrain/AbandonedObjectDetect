@@ -7,7 +7,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         super(DetectComponentApp, self).__init__(*args, **kwargs)
         self.setupUi(self)
 
-    pass
+    def event_register(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -31,5 +32,3 @@ if __name__ == '__main__':
     window = testWindow()
     window.show()
     app.exec_()
-
-    pass

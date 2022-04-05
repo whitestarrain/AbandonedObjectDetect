@@ -38,3 +38,5 @@ thop  # FLOPs computation
 # application ---------------------------------
 PyQt5
 qdarkstyle
+mysql-connector-python
+sqlalchemy

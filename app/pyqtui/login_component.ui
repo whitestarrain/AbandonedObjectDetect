@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>登录</string>
   </property>
   <widget class="QPushButton" name="login_button">
    <property name="geometry">
@@ -70,7 +70,7 @@
     <string>密   码:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="login_button_2">
+  <widget class="QPushButton" name="login_cancel_button">
    <property name="geometry">
     <rect>
      <x>314</x>
@@ -89,7 +89,7 @@
     <string>取消</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit">
+  <widget class="QTextEdit" name="username_text">
    <property name="geometry">
     <rect>
      <x>190</x>
@@ -105,7 +105,7 @@
     </font>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textEdit_2">
+  <widget class="QTextEdit" name="password_text">
    <property name="geometry">
     <rect>
      <x>190</x>
@@ -121,7 +121,7 @@
     </font>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="login_warn">
    <property name="geometry">
     <rect>
      <x>160</x>

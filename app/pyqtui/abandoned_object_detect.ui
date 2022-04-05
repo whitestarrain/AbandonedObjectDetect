@@ -20,7 +20,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>智慧教室</string>
+   <string>遗留物检测程序</string>
   </property>
   <property name="windowIcon">
    <iconset theme="window_icon">
@@ -94,14 +94,14 @@
     </property>
     <addaction name="separator"/>
    </widget>
-   <widget class="QMenu" name="menu_3">
+   <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="about_us"/>
+    <addaction name="about"/>
    </widget>
    <addaction name="menu"/>
-   <addaction name="menu_3"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="abandoned_object_detect">
@@ -109,7 +109,7 @@
     <string>遗留物检测</string>
    </property>
   </action>
-  <action name="about_us">
+  <action name="about">
    <property name="text">
     <string>关于</string>
    </property>
