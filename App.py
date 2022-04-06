@@ -12,4 +12,3 @@ if __name__ == '__main__':
     # run
     login_window.show()
     sys.exit(app.exec_())
-    pass
