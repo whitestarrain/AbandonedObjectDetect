@@ -337,7 +337,7 @@ class LoadStreams:
                 else:
                     print('WARNING: Video stream unresponsive, please check your IP camera connection.')
                     self.imgs[i] *= 0
-                    cap.open(stream)  # re-open stream if signal was lost
+                    cap.pre_run(stream)  # re-open stream if signal was lost
             time.sleep(1 / self.fps[i])  # wait time
 
     def __iter__(self):
