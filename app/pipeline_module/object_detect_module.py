@@ -1,6 +1,7 @@
 import numpy as np
 import torch
-from app.pipeline_module.core.base_module import *
+from app.pipeline_module.base.base_module import *
+from app.pipeline_module.base.stage_node import *
 
 
 class ObjectDetectModule(BaseModule):
@@ -14,7 +15,7 @@ class ObjectDetectModule(BaseModule):
         super(ObjectDetectModule, self).pre_run()
 
 
-class ObjectDetectVisModule(DataDealerModule):
+class ObjectDetectVisModule(BaseProcessModule):
 
     def __init__(self, push_frame_func, interval=0.06, skippable=False):
         super(ObjectDetectVisModule, self).__init__(push_frame_func, interval, skippable)
@@ -26,7 +27,7 @@ class ObjectDetectVisModule(DataDealerModule):
 
         self.queue_threshold = 10
 
-    def deal_skipped_data(self, data: DictData, last_data: DictData) -> DictData:
+    def deal_skipped_data(self, data: DataPackage, last_data: DataPackage) -> DataPackage:
         frame = data.frame
         data = last_data
         data.skipped = None

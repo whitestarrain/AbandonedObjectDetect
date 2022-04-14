@@ -1,14 +1,16 @@
-from app.pipeline_module.core.base_module import BaseModule, TaskStage, ModuleBalancer
+from app.pipeline_module.base.base_module import BaseModule, StageNode
+from app.pipeline_module.base.balancer import ModuleBalancer
+from app.pipeline_module.base.stage_node import *
 
 
-class TaskSolution:
+class TaskSolution(object):
 
     def __init__(self):
         self.modules = []
         # stage 链表头
-        self.start_stage: TaskStage = TaskStage()
+        self.start_stage: StageNode = StageNode()
         # 记录最新的stage，链表尾
-        self.last_stage: TaskStage = self.start_stage
+        self.last_stage: StageNode = self.start_stage
         self.source_module = None
         # 所有module 公用一个 balancer
         self.balancer = ModuleBalancer()
@@ -16,14 +18,14 @@ class TaskSolution:
     def set_source_module(self, source_module):
         source_module.balancer = self.balancer
         self.source_module = source_module
-        source_module.task_stage = self.start_stage
+        source_module.stage_node = self.start_stage
         return self
 
     def set_next_module(self, next_module: BaseModule):
         next_module.balancer = self.balancer
         self.modules.append(next_module)
 
-        next_stage = TaskStage()
+        next_stage = StageNode()
         # 链表 stage，指向下一个module
         self.last_stage.next_module = next_module
         self.last_stage.next_stage = next_stage

@@ -1,4 +1,4 @@
-from app.pipeline_module.core.base_module import BaseModule, TASK_DATA_OK
+from app.pipeline_module.base.base_module import BaseModule, STAGE_DATA_OK
 
 import cv2
 import numpy as np
@@ -96,7 +96,7 @@ class YoloV5Module(BaseModule):
 
     def process_data(self, data):
         data.detections = self.detector.detect(data.frame)
-        return TASK_DATA_OK
+        return STAGE_DATA_OK
 
     def pre_run(self):
         super(YoloV5Module, self).pre_run()

@@ -9,8 +9,9 @@ import torch
 from PIL import ImageFont, Image, ImageDraw
 from PyQt5.QtGui import QPixmap, QImage
 
+from app.pipeline_module.base.stage_node import *
 # from models.concentration_evaluator import ConcentrationEvaluation, ConcentrationEvaluator
-from app.pipeline_module.core.base_module import BaseModule, TASK_DATA_OK, DictData
+from app.pipeline_module.base.base_module import BaseModule, STAGE_DATA_OK, DataPackage
 # from utils.vis import draw_keypoints136
 
 box_color = (0, 255, 0)
@@ -84,7 +85,7 @@ class DrawModule(BaseModule):
         cv2.imshow("yolov5", frame)
         cv2.waitKey(40)
         self.last_time = current_time
-        return TASK_DATA_OK
+        return STAGE_DATA_OK
 
     def pre_run(self):
         super(DrawModule, self).pre_run()
@@ -119,7 +120,7 @@ class FrameDataSaveModule(BaseModule):
         self.app.video_screen.setPixmap(self.cvImg2qtPixmap(frame))
         time.sleep(0.04)
         self.last_time = current_time
-        return TASK_DATA_OK
+        return STAGE_DATA_OK
 
     @staticmethod
     def cvImg2qtPixmap(frame):
@@ -148,7 +149,7 @@ class DataDealerModule(BaseModule):
         self.queue_threshold = 10
 
     @abstractmethod
-    def deal_skipped_data(self, data: DictData, last_data: DictData) -> DictData:
+    def deal_skipped_data(self, data: DataPackage, last_data: DataPackage) -> DataPackage:
         pass
 
     @abstractmethod
@@ -172,30 +173,30 @@ class DataDealerModule(BaseModule):
             time.sleep(1 / data.source_fps * (1 + self.self_balance_factor()))
         else:
             time.sleep(self.interval)
-        return TASK_DATA_OK
+        return STAGE_DATA_OK
 
     def self_balance_factor(self):
         factor = max(-0.999, (self.queue.qsize() / 20 - 0.5) / -0.5)
         # print(factor)
         return factor
 
-    def product_task_data(self):
+    def product_stage_data(self):
         # print(self.queue.qsize(), self.size_waiting)
         if self.queue.qsize() == 0:
             self.size_waiting = True
         if self.queue.qsize() > self.queue_threshold or not self.size_waiting:
             self.size_waiting = False
             try:
-                task_data = self.queue.get(block=True, timeout=1)
-                return task_data
+                stage_data = self.queue.get(block=True, timeout=1)
+                return stage_data
             except Empty:
-                return self.ignore_task_data
+                return self.ignore_stage_data
         else:
             time.sleep(1)
-            return self.ignore_task_data
+            return self.ignore_stage_data
 
-    def put_task_data(self, task_data):
-        self.queue.put(task_data)
+    def put_stage_data(self, stage_data):
+        self.queue.put(stage_data)
 
     def pre_run(self):
         super(DataDealerModule, self).pre_run()
@@ -207,7 +208,7 @@ class ObjectDetectVisModule(DataDealerModule):
     def __init__(self, push_frame_func, interval=0.06, skippable=False):
         super(ObjectDetectVisModule, self).__init__(push_frame_func, interval, skippable)
 
-    def deal_skipped_data(self, data: DictData, last_data: DictData) -> DictData:
+    def deal_skipped_data(self, data: DataPackage, last_data: DataPackage) -> DataPackage:
         frame = data.frame
         data = last_data
         data.skipped = None

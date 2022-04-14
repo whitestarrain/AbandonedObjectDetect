@@ -13,16 +13,14 @@ from itertools import islice
 from PyQt5.QtGui import QImage, QPixmap, QIcon
 from app.ui_component.detect_component import Ui_DetectComponent
 from threading import Thread, Lock
-from app.pipeline_module.core.base_module import *
-from app.pipeline_module.core.task_solution import *
+from app.pipeline_module.base.base_module import *
+from app.pipeline_module.base.task_solution import *
 from app.pipeline_module.video_modules import *
 from app.pipeline_module.yolo_modules import *
 from app.pipeline_module.vis_modules import ObjectDetectVisModule
 
 SOURCE_DIR_RELATIVE = "datasets/test_dataset"
 yolov5_weight = './weights/yolov5s.torchscript.pt'
-alphapose_weight = './weights/halpe136_mobile.torchscript.pth'
-classroom_action_weight = './weights/classroom_action_lr_front_v2_sm.torchscript.pth'
 device = 'cpu'
 
 
@@ -96,7 +94,7 @@ class OffsetList(list):
 
 
 class DetectComponentApp(QWidget, Ui_DetectComponent):
-    push_frame_signal = QtCore.pyqtSignal(DictData)
+    push_frame_signal = QtCore.pyqtSignal(DataPackage)
 
     def __init__(self, *args, **kwargs):
         super(DetectComponentApp, self).__init__(*args, **kwargs)

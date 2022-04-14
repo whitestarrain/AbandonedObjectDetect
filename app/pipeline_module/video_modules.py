@@ -2,15 +2,16 @@ import time
 
 import cv2
 
-from app.pipeline_module.core.base_module \
-    import BaseModule, TASK_DATA_CLOSE, TASK_DATA_OK, TaskData, TASK_DATA_SKIP, TASK_DATA_IGNORE
+from app.pipeline_module.base.stage_node import *
+from app.pipeline_module.base.base_module \
+    import BaseModule, STAGE_DATA_CLOSE, STAGE_DATA_OK, StageData, STAGE_DATA_SKIP, STAGE_DATA_IGNORE
 
 
 class VideoModule(BaseModule):
 
     def __init__(self, source=0, fps=25, skippable=False):
         super(VideoModule, self).__init__(skippable=skippable)
-        self.task_stage = None
+        self.stage_node = None
         self.source = source
         self.cap = None
         self.frame = None
@@ -23,15 +24,15 @@ class VideoModule(BaseModule):
         if not self.ret:
             if self.loop:
                 self.pre_run()
-                return TASK_DATA_IGNORE
+                return STAGE_DATA_IGNORE
             else:
-                return TASK_DATA_CLOSE
+                return STAGE_DATA_CLOSE
         data.source_fps = self.fps
         data.frame = self.frame
         self.ret, self.frame = self.cap.read()
-        result = TASK_DATA_OK
+        result = STAGE_DATA_OK
         if self.skip_timer != 0:
-            result = TASK_DATA_SKIP
+            result = STAGE_DATA_SKIP
             data.skipped = None
         skip_gap = int(self.fps * self.balancer.short_stab_interval)
         if self.skip_timer > skip_gap:
@@ -41,8 +42,8 @@ class VideoModule(BaseModule):
         time.sleep(self.interval)
         return result
 
-    def product_task_data(self):
-        return TaskData(self.task_stage)
+    def product_stage_data(self):
+        return StageData(self.stage_node)
 
     def set_fps(self, fps):
         self.fps = fps
