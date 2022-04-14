@@ -23,9 +23,10 @@ class AbandonedObjectDetectApp(QMainWindow, Ui_AbandonedObjectDetect):
         #
         # self.tabWidget.currentChanged.connect(current_tab_change)
 
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+    def closeEvent(self, event) -> None:
+        print("closing:", self)
         self.detect_component_app.close()
-        super(AbandonedObjectDetectApp, self).closeEvent(a0)
+        super(AbandonedObjectDetectApp, self).closeEvent(event)
 
 
 if __name__ == '__main__':

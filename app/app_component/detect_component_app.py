@@ -46,14 +46,6 @@ class QListWidgetItemForVideo(QListWidgetItem):
         super(QListWidgetItemForVideo, self).__init__()
         self.list_widget: QListWidget = list_widget
         self.type = type
-        # cap = cv.VideoCapture(src)
-        # if not cap.isOpened():
-        #     raise Exception()
-        # ret, frame = cap.read()
-        # cap.release()
-        # icon = QIcon()
-        # icon.addPixmap(QPixmap(frame), QIcon.Normal, QIcon.Off)
-        # self.setIcon(icon)
         self.setText(name + "(" + src + ")")
         self.src = src
 
@@ -192,6 +184,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                                 type=QListWidgetItemForVideo.SourceType.CAMERA.value).add_item()
 
     def open_source(self, source):
+        if not os.path.exists(source):
+            source = int(source)
         self.open_source_lock.acquire(blocking=True)
         if self.opened_source is not None:
             self.close_source()
@@ -237,8 +231,6 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.frame_data_list.clear()
             self.video_process_bar.setMaximum(-1)
             self.playing_real_time = False
-            # self.cheating_list.clear()
-            # self.real_time_catch_list.clear()
 
     def push_frame(self, data):
         try:
@@ -252,7 +244,6 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.video_process_bar.setMinimum(self.frame_data_list.min_index())
             self.video_process_bar.setMaximum(self.frame_data_list.max_index())
 
-            # 添加到作弊列表
             # data.frame_num = max_index + 1
             # if data.num_of_cheating > 0 and self.check_cheating_change(data):
             #     self.add_cheating_list_signal.emit(data)
@@ -318,6 +309,11 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         if self.playing is not None:
             # thread 设置为None之后就就出循环了
             self.playing = None
+
+    def close(self):
+        print("closing:", self)
+        self.close_source()
+        super(DetectComponentApp, self).close()
 
 
 if __name__ == '__main__':

@@ -46,5 +46,4 @@ class TaskSolution(object):
     def close(self):
         self.source_module.close()
         for module in self.modules:
-            print(f'closing modules {module}')
             module.close()

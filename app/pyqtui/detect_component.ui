@@ -36,9 +36,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="video_source_txt">
+      <widget class="QLineEdit" name="video_now_source_path">
        <property name="text">
-        <string>resource/videos/front_cheat.mp4</string>
+        <string>resource/videos/test.mp4</string>
        </property>
       </widget>
      </item>
@@ -425,7 +425,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="cheating_list_spin">
+            <widget class="QSpinBox" name="abandoned_object_max_num">
              <property name="minimum">
               <number>1</number>
              </property>

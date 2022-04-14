@@ -14,7 +14,7 @@ class BaseModule(ABC):
         self.worker_thread = None
         self.running = False
         self.skippable = skippable
-        self.ignore_stage_data = StageData(stage_node=None, stage_flag=STAGE_DATA_IGNORE)
+        self.ignore_stage_data = StageData(stage_node=None, data_status=STAGE_DATA_ABSTRACT)
         self.queue = Queue(maxsize=queueSize)
         self.balancer: ModuleBalancer = balancer
         self.process_interval = 0.01
@@ -36,8 +36,9 @@ class BaseModule(ABC):
         """
         结束运行
         """
-        print(f'closing: {self}')
+        # print(f'closing: {self}')
         self.running = False
+        self.queue = None
 
     def _run(self):
         """
@@ -49,7 +50,11 @@ class BaseModule(ABC):
         """
         self.running = True
         self.pre_run()
-        while self.running:
+        while True:
+            if not self.running:
+                print("close module:", self)
+                break
+
             stage_data = self.product_stage_data()
 
             execute_condition = (stage_data.stage_flag == STAGE_DATA_OK) or \
@@ -63,14 +68,15 @@ class BaseModule(ABC):
                 stage_data.stage_flag = STAGE_DATA_SKIP
             else:
                 self.process_interval = process_interval
-            if execute_result == STAGE_DATA_IGNORE:
+
+            if execute_result == STAGE_DATA_ABSTRACT:
                 continue
-            else:
-                if execute_result == STAGE_DATA_CLOSE:
-                    stage_data.stage_flag = STAGE_DATA_CLOSE
-                    self.close()
-                if stage_node.next_stage is not None:
-                    stage_node.to_next_stage(stage_data)
+            elif execute_result == STAGE_DATA_CLOSE:
+                stage_data.stage_flag = STAGE_DATA_CLOSE
+                self.close()
+            elif stage_node.next_stage is not None:
+                stage_node.to_next_stage(stage_data)
+
             if self.balancer is not None:
                 suitable_interval = self.balancer.get_suitable_interval(process_interval, self)
                 # print(self, ":", suitable_interval)
@@ -165,4 +171,3 @@ class BaseProcessModule(BaseModule):
 
     def pre_run(self):
         super(BaseProcessModule, self).pre_run()
-        pass

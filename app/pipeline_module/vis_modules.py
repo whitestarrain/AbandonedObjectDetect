@@ -12,6 +12,7 @@ from PyQt5.QtGui import QPixmap, QImage
 from app.pipeline_module.base.stage_node import *
 # from models.concentration_evaluator import ConcentrationEvaluation, ConcentrationEvaluator
 from app.pipeline_module.base.base_module import BaseModule, STAGE_DATA_OK, DataPackage
+
 # from utils.vis import draw_keypoints136
 
 box_color = (0, 255, 0)
@@ -196,6 +197,8 @@ class DataDealerModule(BaseModule):
             return self.ignore_stage_data
 
     def put_stage_data(self, stage_data):
+        if self.queue is None:
+            return
         self.queue.put(stage_data)
 
     def pre_run(self):

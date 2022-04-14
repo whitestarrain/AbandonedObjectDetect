@@ -4,7 +4,7 @@ import cv2
 
 from app.pipeline_module.base.stage_node import *
 from app.pipeline_module.base.base_module \
-    import BaseModule, STAGE_DATA_CLOSE, STAGE_DATA_OK, StageData, STAGE_DATA_SKIP, STAGE_DATA_IGNORE
+    import BaseModule, STAGE_DATA_CLOSE, STAGE_DATA_OK, StageData, STAGE_DATA_SKIP, STAGE_DATA_ABSTRACT
 
 
 class VideoModule(BaseModule):
@@ -24,7 +24,7 @@ class VideoModule(BaseModule):
         if not self.ret:
             if self.loop:
                 self.pre_run()
-                return STAGE_DATA_IGNORE
+                return STAGE_DATA_ABSTRACT
             else:
                 return STAGE_DATA_CLOSE
         data.source_fps = self.fps
@@ -48,6 +48,10 @@ class VideoModule(BaseModule):
     def set_fps(self, fps):
         self.fps = fps
         self.interval = 1 / fps
+
+    def close(self):
+        self.cap.release()
+        super().close()
 
     def pre_run(self):
         super(VideoModule, self).pre_run()
