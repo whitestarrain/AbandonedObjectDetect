@@ -203,7 +203,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
 
     # init cfg model
     cfg_model = Darknet(opt.model_cfg, (opt.imgsz, opt.imgsz)).to(device)
-    # cfg_model = Darknet('cfg/yolov5s_v3.cfg', (416, 416)).to(device)
+    # cfg_model = Darknet('cfg/yolov5s_v3.cfg', (640, 640)).to(device)
     if len(model.yaml["anchors"]) == 4:
         copy_weight_v6x(model, cfg_model)
     else:

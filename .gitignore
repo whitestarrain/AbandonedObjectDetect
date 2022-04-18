@@ -17,7 +17,6 @@
 *.mov
 *.MOV
 *.avi
-*.data
 *.json
 *.cfg
 !cfg/yolov3*.cfg
@@ -28,7 +27,10 @@ runs/*
 results*.csv
 
 # Datasets -------------------------------------------------------------------------------------------------------------
-datasets
+!datasets
+datasets/*
+!datasets/coco4
+!datasets/coco4/images/train2017/*.jpg
 !data/images/*
 
 # MATLAB GitIgnore -----------------------------------------------------------------------------------------------------

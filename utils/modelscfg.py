@@ -97,7 +97,7 @@ def create_modules(module_defs, img_size, arc):
             mask = [int(x) for x in mdef['mask'].split(',')]  # anchor mask
             modules = YOLOLayer(anchors=mdef['anchors'][mask],  # anchor list
                                 nc=int(mdef['classes']),  # number of classes
-                                img_size=img_size,  # (416, 416)
+                                img_size=img_size,  # (640, 640)
                                 yolo_index=yolo_index,  # 0, 1 or 2
                                 arc=arc)  # yolo architecture
 
@@ -279,7 +279,7 @@ def parse_model_cfg(path):
 class Darknet(nn.Module):
     # YOLOv3 object detection model
 
-    def __init__(self, cfg, img_size=(416, 416), arc='default'):
+    def __init__(self, cfg, img_size=(640, 640), arc='default'):
         super(Darknet, self).__init__()
 
         if isinstance(cfg, str):
@@ -358,7 +358,7 @@ def get_yolo_layers(model):
     return [i for i, x in enumerate(model.module_defs) if x['type'] == 'yolo']  # [82, 94, 106] for yolov3
 
 
-def create_grids(self, img_size=416, ng=(13, 13), device='cpu', type=torch.float32):
+def create_grids(self, img_size=640, ng=(13, 13), device='cpu', type=torch.float32):
     nx, ny = ng  # x and y grid size
     self.img_size = max(img_size)
     self.stride = self.img_size / max(ng)

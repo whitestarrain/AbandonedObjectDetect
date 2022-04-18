@@ -261,7 +261,7 @@ def load_classifier(name='resnet101', n=2):
     return model
 
 
-def scale_img(img, ratio=1.0, same_shape=False, gs=32):  # img(16,3,256,416)
+def scale_img(img, ratio=1.0, same_shape=False, gs=32):  # img(16,3,256,640)
     # scales img(bs,3,y,x) by ratio constrained to gs-multiple
     if ratio == 1.0:
         return img

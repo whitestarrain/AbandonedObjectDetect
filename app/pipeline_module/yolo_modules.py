@@ -60,12 +60,12 @@ class YoloV5Detector:
         # img = np.stack(img, 0)
         # to_tensor
         # Convert
-        # img = img[:, :, :, ::-1].transpose(0, 3, 1, 2) / 255  # BGR to RGB, to bsx3x416x416
+        # img = img[:, :, :, ::-1].transpose(0, 3, 1, 2) / 255  # BGR to RGB, to bsx3x640x640
         # img = np.ascontiguousarray(img)
 
         # if img.ndim == 3:
         #     img = np.expand_dims(img, 0)
-        # img = img[:, :, :, ::-1].transpose(0, 3, 1, 2) / 255  # BGR to RGB, to bsx3x416x416
+        # img = img[:, :, :, ::-1].transpose(0, 3, 1, 2) / 255  # BGR to RGB, to bsx3x640x640
         # img = np.ascontiguousarray(img)
 
         return self.transformer(img[:, :, ::-1].copy()).unsqueeze(0).to(self.device, dtype=torch.float32)

@@ -124,7 +124,7 @@ def test(cfg,
          data,
          weights=None,
          batch_size=16,
-         img_size=416,
+         img_size=640,
          iou_thres=0.5,
          conf_thres=0.001,
          nms_thres=0.5,
@@ -313,16 +313,17 @@ def test(cfg,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--cfg', type=str, default='cfg/yolov5s.cfg', help='cfg file path')
-    parser.add_argument('--data', type=str, default='data/coco.data', help='coco.data file path')
-    parser.add_argument('--weights', type=str, default='weights/yolov3-spp.weights', help='path to weights file')
+    parser.add_argument('--cfg', type=str, default='cfg/yolov5s_v6.cfg', help='cfg file path')
+    # yolov3 的数据格式，此处测试，只要给定valid数据就行。label会自动根据相对路径去找
+    parser.add_argument('--data', type=str, default='data/coco4.data', help='coco.data file path')
+    parser.add_argument('--weights', type=str, default=r'D:\MyRepo\AbandonedObjectDetect\runs\train\sparsity_test5\weights\best.pt', help='path to weights file')
     parser.add_argument('--batch-size', type=int, default=16, help='size of each image batch')
-    parser.add_argument('--img-size', type=int, default=416, help='inference size (pixels)')
+    parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='iou threshold required to qualify as detected')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
     parser.add_argument('--nms-thres', type=float, default=0.5, help='iou threshold for non-maximum suppression')
     parser.add_argument('--save-json', action='store_true', help='save a cocoapi-compatible JSON results file')
-    parser.add_argument('--device', default='', help='device id (i.e. 0 or 0,1) or cpu')
+    parser.add_argument('--device', default='cpu', help='device id (i.e. 0 or 0,1) or cpu')
     opt = parser.parse_args()
     print(opt)
 

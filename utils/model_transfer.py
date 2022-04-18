@@ -504,7 +504,7 @@ if __name__ == '__main__':
     parser.add_argument('--cfg', type=str, default='../cfg/yolov5x6_v6.cfg', help='cfg file path')
     parser.add_argument('--path', type=str, default='../data/images/bus.jpg', help='img file path')
     parser.add_argument('--weights', type=str, default='../weights/yolov5x6.pt', help='sparse model weights')
-    parser.add_argument('--img_size', type=int, default=416, help='inference size (pixels)')
+    parser.add_argument('--img_size', type=int, default=640, help='inference size (pixels)')
     opt = parser.parse_args()
     print(opt)
 
@@ -548,7 +548,7 @@ if __name__ == '__main__':
     img = letterbox(img0, new_shape=img_size,stride=stride)[0]
 
     # Convert
-    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x640x640
     img = np.ascontiguousarray(img)
     img = torch.from_numpy(img).to(device)
     img = img.float()
@@ -568,7 +568,7 @@ if __name__ == '__main__':
 #     parser.add_argument('--hyp', type=str, default='../data/hyps/hyp.scratch.yaml', help='hyperparameters path')
 #     parser.add_argument('--yaml_cfg', type=str, default='../models/yolov5s.yaml', help='model.yaml path')
 #     parser.add_argument('--weights', type=str, default='../weights/prune_0.6_keep_0.01_8x_last_v6s.pt', help='sparse model weights')
-#     parser.add_argument('--img_size', type=int, default=416, help='inference size (pixels)')
+#     parser.add_argument('--img_size', type=int, default=640, help='inference size (pixels)')
 #     opt = parser.parse_args()
 #     print(opt)
 #
@@ -609,10 +609,10 @@ if __name__ == '__main__':
 #     path = opt.path
 #     img0 = cv2.imread(path)  # BGR
 #     # Padded resize
-#     img = letterbox(img0, new_shape=416)[0]
+#     img = letterbox(img0, new_shape=640)[0]
 #
 #     # Convert
-#     img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+#     img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x640x640
 #     img = np.ascontiguousarray(img)
 #     img = torch.from_numpy(img).to(device)
 #     img = img.float()
