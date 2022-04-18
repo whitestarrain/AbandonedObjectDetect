@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+
 def parse_model_cfg(path):
     # Parses the yolo-v3 layer configuration file and returns module definitions
     file = open(path, 'r')
@@ -29,10 +30,11 @@ def parse_model_cfg(path):
 def parse_data_cfg(path):
     # Parses the data configuration file
     options = dict()
-    with open(path, 'r') as fp:
+    with open(path, 'r', encoding="utf-8") as fp:
         lines = fp.readlines()
 
     for line in lines:
+        print(line)
         line = line.strip()
         if line == '' or line.startswith('#'):
             continue
@@ -40,4 +42,3 @@ def parse_data_cfg(path):
         options[key.strip()] = val.strip()
 
     return options
-

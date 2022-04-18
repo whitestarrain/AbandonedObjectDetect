@@ -303,7 +303,7 @@ class Darknet(nn.Module):
             mtype = mdef['type']
             # print("i=",i)
             if mtype in ['convolutional', 'upsample', 'maxpool','convolutional_nobias','convolutional_noconv']:
-                x = module(x)
+                x = module(x.float())
             elif mtype == 'focus':
                 x = torch.cat([x[..., ::2, ::2], x[..., 1::2, ::2], x[..., ::2, 1::2], x[..., 1::2, 1::2]], 1)
             elif mtype == 'route':
