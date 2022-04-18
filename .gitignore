@@ -19,7 +19,7 @@
 *.avi
 *.json
 *.cfg
-!cfg/yolov3*.cfg
+!cfg/yolov5*.cfg
 2.4.1'
 
 runs/*
