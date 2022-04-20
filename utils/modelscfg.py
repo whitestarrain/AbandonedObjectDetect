@@ -425,7 +425,7 @@ def load_darknet_weights(self, weights, cutoff=-1):
                 conv_layer.weight.data.copy_(conv_w)
                 ptr += num_w
             else:
-                if os.path.basename(file) == 'yolov3.weights' or os.path.basename(file) == 'yolov3-tiny.weights' or os.path.basename(file) == 'yolov3-spp.weights' or os.path.basename(file) == 'yolov4.weights':
+                if os.source_path.basename(file) == 'yolov3.weights' or os.source_path.basename(file) == 'yolov3-tiny.weights' or os.source_path.basename(file) == 'yolov3-spp.weights' or os.source_path.basename(file) == 'yolov4.weights':
                     #加载权重'yolov3.weights' 或者 'yolov3-tiny-weights.' 是为了更好初始化自己模型权重，要避免同名
                     num_b = 255
                     ptr += num_b

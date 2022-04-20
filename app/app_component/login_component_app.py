@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow
 
-from app.service.UserService import UserService
+from app.service.user_service import UserService
 from app.ui_component.login_component import Ui_login
 
 

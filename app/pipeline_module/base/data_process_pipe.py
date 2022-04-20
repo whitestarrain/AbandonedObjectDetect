@@ -3,7 +3,7 @@ from app.pipeline_module.base.balancer import ModuleBalancer
 from app.pipeline_module.base.stage_node import *
 
 
-class TaskSolution(object):
+class DataProcessPipe(object):
 
     def __init__(self):
         self.modules = []
@@ -24,7 +24,6 @@ class TaskSolution(object):
     def set_next_module(self, next_module: BaseModule):
         next_module.balancer = self.balancer
         self.modules.append(next_module)
-
         next_stage = StageNode()
         # 链表 stage，指向下一个module
         self.last_stage.next_module = next_module
@@ -37,11 +36,6 @@ class TaskSolution(object):
             print(f'starting modules {module}')
             module.start()
         self.source_module.start()
-
-    def wait_for_end(self):
-        self.source_module.wait_for_end()
-        for module in self.modules:
-            module.wait_for_end()
 
     def close(self):
         self.source_module.close()

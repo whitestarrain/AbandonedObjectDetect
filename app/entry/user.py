@@ -1,4 +1,4 @@
-from sqlalchemy import Column, INT, String, create_engine
+from sqlalchemy import Column, INT, String, create_engine, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -11,6 +11,8 @@ class User(Base):
     id = Column(INT, primary_key=True, autoincrement=True)
     username = Column(String(30))
     password = Column(String(30))
+    insert_time = Column(DateTime, nullable=False)
+    update_time = Column(DateTime, nullable=False)
 
 
 if __name__ == '__main__':

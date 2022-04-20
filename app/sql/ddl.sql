@@ -15,9 +15,16 @@ INSERT INTO user(username,PASSWORD,insert_time,update_time) VALUES('root','root'
 
 create table video_resource
 (
-    id       INT PRIMARY KEY AUTO_INCREMENT,
-    file_name varchar(20),
-    path varchar(50),
-    insert_time datetime not null,
-    update_time datetime not null
-)
+    id          INT PRIMARY KEY AUTO_INCREMENT,
+    file_name   varchar(20)  not null,
+    source_path varchar(100) not null,
+    type        int          not null default 0, -- 视频源类型。 0 文件 1 摄像头
+    insert_time datetime     not null,
+    update_time datetime     not null
+);
+
+insert into video_resource(file_name, source_path, type, insert_time, update_time)
+values ('test_video', 'D:/MyRepo/AbandonedObjectDetect/datasets/test_dataset/1.avi', 0, now(), now());
+
+insert into video_resource(file_name, source_path, type, insert_time, update_time)
+values ('camera0', '0', 1, now(), now());

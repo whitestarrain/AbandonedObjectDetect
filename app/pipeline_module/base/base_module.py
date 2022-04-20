@@ -104,10 +104,6 @@ class BaseModule(ABC):
         except Empty:
             return self.ignore_stage_data
 
-    def wait_for_end(self):
-        self.worker_thread.join()
-
-
 class BaseProcessModule(BaseModule):
     def __init__(self, push_frame_func, interval=0.06, skippable=False):
         super(BaseProcessModule, self).__init__(skippable=skippable)
