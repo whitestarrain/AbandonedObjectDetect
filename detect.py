@@ -279,7 +279,7 @@ def parse_opt():
     # 每张图片最多检测到目标的个数
     parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per image')
     # device
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # 是否查看图片
     parser.add_argument('--view-img', action='store_true', help='show results')
     # 是否保存检测结果到txe
