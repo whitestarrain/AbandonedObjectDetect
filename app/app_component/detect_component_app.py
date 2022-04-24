@@ -18,7 +18,6 @@ from threading import Thread, Lock
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
 from app.process_module.source_modules import *
-from app.process_module.yolo_modules import *
 from app.process_module.image_detect_module import YoloV5DetectModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
