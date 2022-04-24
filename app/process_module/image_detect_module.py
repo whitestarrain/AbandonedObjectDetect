@@ -2,16 +2,16 @@ import cv2
 import numpy as np
 import torch
 
-from app.pipeline_module.base.base_module import *
+from app.process_module.base.base_module import *
 from utils.augmentations import letterbox
 from detect import parse_opt as get_opt, ROOT, select_device, Path, check_suffix, attempt_load, load_classifier, \
-    check_img_size, non_max_suppression
+    check_img_size, non_max_suppression, scale_coords
 
 opt = get_opt()
 
 
 class YoloV5DetectModule(BaseModule):
-    def __init__(self, opt, skippable=True):
+    def __init__(self, skippable=True):
         super(YoloV5DetectModule, self).__init__(skippable=skippable)
         self.parse_opt(**vars(opt))
         self._load_module()
@@ -78,34 +78,34 @@ class YoloV5DetectModule(BaseModule):
         w = str(self.weights[0] if isinstance(self.weights, list) else self.weights)
         classify, suffix, suffixes = False, Path(w).suffix.lower(), ['.pt', '.onnx', '.tflite', '.pb', '']
         check_suffix(w, suffixes)  # check weights have acceptable suffix
-        stride, names = 64, [f'class{i}' for i in range(1000)]  # assign defaults
+        self.stride, self.names = 64, [f'class{i}' for i in range(1000)]  # assign defaults
 
         self.model = torch.jit.load(w) if 'torchscript' in w else attempt_load(self.weights, map_location=self.device)
         self.stride = int(self.model.stride.max())  # model stride
-        names = self.model.module.names if hasattr(self.model, 'module') else self.model.names  # get class names
+        self.names = self.model.module.names if hasattr(self.model, 'module') else self.model.names  # get class names
         if self.half:
             self.model.half()  # to FP16
         if classify:  # second-stage classifier
             modelc = load_classifier(name='resnet50', n=2)  # initialize
             modelc.load_state_dict(torch.load('resnet50.pt', map_location=self.device)['model']).to(self.device).eval()
-        self.imgsz = check_img_size(self.imgsz, s=stride)  # check image size
+        self.imgsz = check_img_size(self.imgsz, s=self.stride)  # check image size
 
-    def _pre_process_frame(self, imgs):
+    def _pre_process_frame(self, frame):
 
         # Letterbox
-        img0 = imgs.copy()
-        img = [letterbox(x, self.imgsz, self.stride)[0] for x in img0]
+        img0 = frame.copy()
+        # img0 = cv2.flip(img0, 1)  # flip left-right
+
+        # Padded resize
+        img = letterbox(img0, self.imgsz, stride=self.stride)[0]
 
         # Stack
         img = np.stack(img, 0)
 
         # Convert
-        img = img[:, :, ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW
+        img = img.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
         img = np.ascontiguousarray(img)
         return img, img0
-
-    def pred_convert(self, pred):
-        return pred
 
     @torch.no_grad()
     def detect(self, imgs):
@@ -122,20 +122,73 @@ class YoloV5DetectModule(BaseModule):
         pred = self.model(img, self.augment, self.visualize)[0]
         pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, self.classes, self.agnostic_nms,
                                    max_det=self.max_det)
-        return self.pred_convert(pred)
+        # print(pred)
+
+        for i, det in enumerate(pred):  # per image
+            if len(det):
+                # 预测到的结果是指定size图片上的。这里转换为画在原图片上的框
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
+                for *xyxy, conf, cls in reversed(det):
+                    c = int(cls)  # integer class
+                    lable = self.names[c]
+
+        return pred
 
     def process_data(self, data):
-        super(YoloV5DetectModule, self).process_data(data)
+        data.pred = self.detect(data.frame)
 
     def pre_run(self):
         super(YoloV5DetectModule, self).pre_run()
 
 
 if __name__ == '__main__':
+    import numpy as np
+
     detect_module = YoloV5DetectModule(opt)
-    pred = detect_module.detect(np.stack(
-        [
-            cv2.imread(r"D:\MyRepo\AbandonedObjectDetect\data\images\bus.jpg")
-        ]
-    ))
+    frame = cv2.imread(r"D:\MyRepo\AbandonedObjectDetect\data\images\bus.jpg")
+    pred: torch.Tensor = detect_module.detect(frame)[0]
     print(pred)
+    dim0 = len(pred)
+    for i in range(dim0):
+        x1 = int(pred[i][0])
+        y1 = int(pred[i][1])
+        x2 = int(pred[i][2])
+        y2 = int(pred[i][3])
+        conf = int(pred[i][4])
+        cls = int(pred[i][5])
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
+
+    # for one_pred in pred:
+    #     for pred_index in range(len(one_pred)):
+    #         one_pred[pred_index] = int(one_pred[pred_index])
+    #     for x1, x2, y1, y2, conf, cls in one_pred:
+    #         cv2.rectangle(frame, (int(x1), y1), (x2, y2), (0, 255, 0), 3)
+
+    cv2.imshow("bus", frame)
+    k = cv2.waitKey(0)  # show time,0: don't close
+    if k == ord("q"):
+        cv2.destroyAllWindows()
+
+    #
+    #
+    # # create a VideoCapture object
+    # cap = cv.VideoCapture(0)
+    # if not cap.isOpened():
+    #     print("Cannot open camera")
+    #     exit()
+    # while True:
+    #     # Capture frame-by-frame
+    #     ret, frame = cap.read()
+    #     # if frame is read correctly ret is True
+    #     if not ret:
+    #         print("Can't receive frame (stream end?). Exiting ...")
+    #         break
+    #     pred = detect_module.detect(np.stack([frame]))
+    #     print(pred)
+    #
+    #     cv.imshow('frame', frame)
+    #     if cv.waitKey(1) == ord('q'):
+    #         break
+    # # When everything done, release the capture
+    # cap.release()
+    # cv.destroyAllWindows()

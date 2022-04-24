@@ -5,8 +5,8 @@ from queue import Empty
 from queue import Queue
 from threading import Thread
 
-from app.pipeline_module.base.balancer import *
-from app.pipeline_module.base.stage_node import *
+from app.process_module.base.balancer import *
+from app.process_module.base.stage_node import *
 
 
 class BaseModule(ABC):

@@ -1,4 +1,4 @@
-from app.pipeline_module.base.base_module import BaseModule, STAGE_DATA_OK
+from app.process_module.base.base_module import BaseModule, STAGE_DATA_OK
 
 import cv2
 import numpy as np

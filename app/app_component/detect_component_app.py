@@ -15,12 +15,12 @@ from typing import List
 
 from app.ui_component.detect_component import Ui_DetectComponent
 from threading import Thread, Lock
-from app.pipeline_module.base.base_module import *
-from app.pipeline_module.base.data_process_pipe import *
-from app.pipeline_module.source_modules import *
-from app.pipeline_module.yolo_modules import *
-from app.pipeline_module.image_detect_module import YoloV5DetectModule
-from app.pipeline_module.vis_modules import ObjectDetectVisModule
+from app.process_module.base.base_module import *
+from app.process_module.base.data_process_pipe import *
+from app.process_module.source_modules import *
+from app.process_module.yolo_modules import *
+from app.process_module.image_detect_module import YoloV5DetectModule
+from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
 from app.entry.video_resource import VideoResource
 
@@ -191,9 +191,9 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             #     .set_next_module(YoloV5Module(yolov5_weight, device)) \
             #     .set_next_module(ObjectDetectModule()) \
             #     .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
+            # .set_source_module(YoloV5DetectModule(skippable=False)) \
             self.opened_source = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
-                .set_source_module(YoloV5DetectModule(skippable=False)) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.opened_source.start()
             self.playing_real_time = True

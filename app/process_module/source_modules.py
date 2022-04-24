@@ -2,8 +2,8 @@ import time
 
 import cv2
 
-from app.pipeline_module.base.stage_node import *
-from app.pipeline_module.base.base_module \
+from app.process_module.base.stage_node import *
+from app.process_module.base.base_module \
     import BaseModule, STAGE_DATA_CLOSE, STAGE_DATA_OK, StageData, STAGE_DATA_SKIP, STAGE_DATA_ABSTRACT
 
 

@@ -187,6 +187,8 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         if classify: # 第二次分类
             pred = apply_classifier(pred, modelc, img, im0s)
 
+        # print(pred)
+
         # 讲预测结果应用到图片上
         for i, det in enumerate(pred):  # per image
             seen += 1
@@ -282,7 +284,7 @@ def parse_opt():
     parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     # 是否查看图片
     parser.add_argument('--view-img', action='store_true', help='show results')
-    # 是否保存检测结果到txe
+    # 是否保存检测结果到txt
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
     # 是否保存预测概率
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
