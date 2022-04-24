@@ -23,6 +23,7 @@ class BaseModule(ABC):
 
     @abstractmethod
     def process_data(self, data):
+        print("process data", self)
         pass
 
     @abstractmethod
@@ -84,6 +85,7 @@ class BaseModule(ABC):
                     time.sleep(suitable_interval)
 
     def start(self):
+        print("run:", self)
         p = Thread(target=self._run, args=())
         p.start()
         self.worker_thread = p
@@ -103,6 +105,7 @@ class BaseModule(ABC):
             return stage_data
         except Empty:
             return self.ignore_stage_data
+
 
 class BaseProcessModule(BaseModule):
     def __init__(self, push_frame_func, interval=0.06, skippable=False):

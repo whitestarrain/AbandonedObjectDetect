@@ -94,3 +94,4 @@ class ObjectDetectVisModule(DataDealerModule):
     def draw_frame(self, data, fps):
         frame = data.frame.copy()
         data.frame_anno = frame  # 保存绘制过的图像
+        # todo draw

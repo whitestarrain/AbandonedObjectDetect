@@ -136,6 +136,7 @@ class YoloV5DetectModule(BaseModule):
 
     def process_data(self, data):
         data.pred = self.detect(data.frame)
+        return STAGE_DATA_OK
 
     def pre_run(self):
         super(YoloV5DetectModule, self).pre_run()

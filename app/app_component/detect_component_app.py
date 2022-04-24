@@ -186,14 +186,9 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         # 启动视频源
         def open_source_func(self):
             fps = 12
-            # self.opened_source = TaskSolution() \
-            #     .set_source_module(VideoModule(source, fps=fps)) \
-            #     .set_next_module(YoloV5Module(yolov5_weight, device)) \
-            #     .set_next_module(ObjectDetectModule()) \
-            #     .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
-            # .set_source_module(YoloV5DetectModule(skippable=False)) \
             self.opened_source = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
+                .set_next_module(YoloV5DetectModule(skippable=False)) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.opened_source.start()
             self.playing_real_time = True
