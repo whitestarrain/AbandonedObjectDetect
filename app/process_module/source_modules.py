@@ -39,7 +39,7 @@ class VideoModule(BaseModule):
             self.skip_timer = 0
         else:
             self.skip_timer += 1
-        time.sleep(self.interval)
+        # time.sleep(self.interval)
         return result
 
     def product_stage_data(self):

@@ -57,6 +57,7 @@ class BaseModule(ABC):
             if not self.running:
                 print("close module:", self)
                 break
+            # print("_run:", self)
 
             data = self.product_stage_data()
 
@@ -80,10 +81,10 @@ class BaseModule(ABC):
             elif stage_node.next_stage is not None:
                 stage_node.to_next_stage(data)
 
-            if self.balancer is not None:
-                suitable_interval = self.balancer.get_suitable_interval(process_interval, self)
-                if suitable_interval > 0:
-                    time.sleep(suitable_interval)
+            # if self.balancer is not None:
+            #     suitable_interval = self.balancer.get_suitable_interval(process_interval, self)
+            #     if suitable_interval > 0:
+            #         time.sleep(suitable_interval)
 
     def start(self):
         print("run:", self)
@@ -143,10 +144,10 @@ class BaseProcessModule(BaseModule):
         data.interval = interval
         self.last_time = current_time  # 更新时间
         self.push_frame_func(data)
-        if hasattr(data, 'source_fps'):
-            time.sleep(1 / data.source_fps * (1 + self.self_balance_factor()))
-        else:
-            time.sleep(self.interval)
+        # if hasattr(data, 'source_fps'):
+        #     time.sleep(1 / data.source_fps * (1 + self.self_balance_factor()))
+        # else:
+        #     time.sleep(self.interval)
         return StageDataStatus.STAGE_DATA_OK
 
     def self_balance_factor(self):
