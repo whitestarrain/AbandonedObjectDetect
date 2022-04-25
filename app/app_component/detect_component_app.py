@@ -124,8 +124,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         """
 
         self.open_source_btn.clicked.connect(
-            lambda: self.open_source(self.video_now_source_path.text()
-                                     if len(self.video_now_source_path.text()) != 0 else 0))
+            lambda: self.open_source(self.video_now_source_path.label()
+                                     if len(self.video_now_source_path.label()) != 0 else 0))
 
         self.video_resource_list.itemClicked.connect(lambda item: self.open_source(item.src))
         self.video_resource_file_list.itemClicked.connect(lambda item: self.open_source(item.src))
@@ -261,7 +261,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             # 更新界面
             data = self.frame_data_list[current_frame]
             maxData = self.frame_data_list[max_frame]
-            frame = data.frame_anno if self.show_box.isChecked() else data.frame
+            # frame = data.frame_anno if self.show_box.isChecked() else data.frame
+            frame = data.frame
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = cv2.resize(frame, (self.video_screen.width() - 9, self.video_screen.height() - 9))  # 调整图像大小
             image_height, image_width, image_depth = frame.shape

@@ -2,12 +2,22 @@ import copy
 import time
 from abc import abstractmethod
 from queue import Empty
+import cv2
 
 from app.process_module.base.base_module import BaseModule, STAGE_DATA_OK, DataPackage
 
-box_color = (0, 255, 0)
-cheating_box_color = (0, 0, 255)
-draw_keypoints_default = False
+
+def draw_box_and_labels(frame, x1, y1, x2, y2, label, conf):
+    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_size = 0.8
+    font_height = int(font_size * 40)
+    cv2.rectangle(frame, (x1 - 2, y1), (x1 + len(label) * 15, y1 - font_height), (0, 255, 0),
+                  -1)  # thickness=-1 为实心
+    cv2.putText(frame, label, (x1, y1 - 10), font, font_size, (0, 0, 255), 1,
+                cv2.LINE_AA)
+    cv2.putText(frame, conf, (x1, y1 + font_height - 10), font, font_size, (0, 0, 255), 1,
+                cv2.LINE_AA)
 
 
 class DataDealerModule(BaseModule):
@@ -76,7 +86,6 @@ class DataDealerModule(BaseModule):
 
     def pre_run(self):
         super(DataDealerModule, self).pre_run()
-        pass
 
 
 class ObjectDetectVisModule(DataDealerModule):
@@ -92,6 +101,16 @@ class ObjectDetectVisModule(DataDealerModule):
         return data
 
     def draw_frame(self, data, fps):
-        frame = data.frame.copy()
-        data.frame_anno = frame  # 保存绘制过的图像
-        # todo draw
+        pred = data.pred[0]
+        dim0 = len(pred)
+        for i in range(dim0):
+            x1 = int(pred[i][0])
+            y1 = int(pred[i][1])
+            x2 = int(pred[i][2])
+            y2 = int(pred[i][3])
+            conf = "%.2f" % float(pred[i][4], )
+            cls = int(pred[i][5])
+            label = str(data.names[cls])
+            draw_box_and_labels(data.frame, x1, y1, x2, y2, label, conf)
+        # frame = data.frame.copy()
+        # data.frame_anno = frame  # 保存绘制过的图像

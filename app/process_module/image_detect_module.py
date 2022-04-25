@@ -136,6 +136,8 @@ class YoloV5DetectModule(BaseModule):
 
     def process_data(self, data):
         data.pred = self.detect(data.frame)
+        data.names = self.names
+        print(data.pred)
         return STAGE_DATA_OK
 
     def pre_run(self):
@@ -155,9 +157,19 @@ if __name__ == '__main__':
         y1 = int(pred[i][1])
         x2 = int(pred[i][2])
         y2 = int(pred[i][3])
-        conf = int(pred[i][4])
+        conf = "%.2f" % float(pred[i][4], )
         cls = int(pred[i][5])
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_size = 0.8
+        label = str(detect_module.names[cls])
+        font_height = int(font_size * 40)
+        cv2.rectangle(frame, (x1 - 2, y1), (x1 + len(label) * 15, y1 - font_height), (0, 255, 0),
+                      -1)  # thickness=-1 为实心
+        cv2.putText(frame, label, (x1, y1 - 10), font, font_size, (0, 0, 255), 1,
+                    cv2.LINE_AA)
+        cv2.putText(frame, conf, (x1, y1 + font_height - 10), font, font_size, (0, 0, 255), 1,
+                    cv2.LINE_AA)
 
     # for one_pred in pred:
     #     for pred_index in range(len(one_pred)):
