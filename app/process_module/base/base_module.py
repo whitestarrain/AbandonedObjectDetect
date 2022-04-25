@@ -7,6 +7,7 @@ from threading import Thread
 
 from app.process_module.base.balancer import *
 from app.process_module.base.stage_node import *
+import app
 
 
 class BaseModule(ABC):
@@ -39,6 +40,7 @@ class BaseModule(ABC):
         """
         # print(f'closing: {self}')
         self.running = False
+        self.queue.queue.clear()
         self.queue = None
 
     def _run(self):
