@@ -4,7 +4,9 @@ from abc import abstractmethod
 from queue import Empty
 import cv2
 
-from app.process_module.base.base_module import BaseModule, STAGE_DATA_OK, DataPackage
+from app.process_module.base.base_module import BaseModule
+
+from app.process_module.base.stage import StageDataStatus, DataPackage
 
 
 def draw_box_and_labels(frame, x1, y1, x2, y2, label, conf):
@@ -57,7 +59,7 @@ class DataDealerModule(BaseModule):
             time.sleep(1 / data.source_fps * (1 + self.self_balance_factor()))
         else:
             time.sleep(self.interval)
-        return STAGE_DATA_OK
+        return StageDataStatus.STAGE_DATA_OK
 
     def self_balance_factor(self):
         factor = max(-0.999, (self.queue.qsize() / 20 - 0.5) / -0.5)

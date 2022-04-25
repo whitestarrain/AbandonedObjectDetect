@@ -7,6 +7,8 @@ from utils.augmentations import letterbox
 from detect import parse_opt as get_opt, ROOT, select_device, Path, check_suffix, attempt_load, load_classifier, \
     check_img_size, non_max_suppression, scale_coords
 
+from app.process_module.base.stage import StageDataStatus
+
 opt = get_opt()
 
 
@@ -137,8 +139,7 @@ class YoloV5DetectModule(BaseModule):
     def process_data(self, data):
         data.pred = self.detect(data.frame)
         data.names = self.names
-        print(data.pred)
-        return STAGE_DATA_OK
+        return StageDataStatus.STAGE_DATA_OK
 
     def pre_run(self):
         super(YoloV5DetectModule, self).pre_run()

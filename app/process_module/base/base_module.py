@@ -6,8 +6,8 @@ from queue import Queue
 from threading import Thread
 
 from app.process_module.base.balancer import *
-from app.process_module.base.stage_node import *
-import app
+from app.process_module.base.stage import *
+from app.process_module.base.stage import StageDataStatus
 
 
 class BaseModule(ABC):
@@ -15,7 +15,7 @@ class BaseModule(ABC):
         self.worker_thread = None
         self.running = False
         self.skippable = skippable
-        self.ignore_stage_data = StageData(stage_node=None, data_status=STAGE_DATA_ABSTRACT)
+        self.ignore_stage_data = StageData(stage_node=None, data_status=StageDataStatus.STAGE_DATA_ABSTRACT)
         self.queue = Queue(maxsize=queueSize)
         self.balancer: ModuleBalancer = balancer
         self.process_interval = 0.01
@@ -58,31 +58,30 @@ class BaseModule(ABC):
                 print("close module:", self)
                 break
 
-            stage_data = self.product_stage_data()
+            data = self.product_stage_data()
 
-            execute_condition = (stage_data.stage_flag == STAGE_DATA_OK) or \
-                                (stage_data.stage_flag == STAGE_DATA_SKIP and not self.skippable)
+            execute_condition = (data.stage_flag == StageDataStatus.STAGE_DATA_OK) or \
+                                (data.stage_flag == StageDataStatus.STAGE_DATA_SKIP and not self.skippable)
 
             start_time = time.time()
-            execute_result = self.process_data(stage_data.data) if execute_condition else stage_data.stage_flag
+            execute_result = self.process_data(data.data) if execute_condition else data.stage_flag
             process_interval = min((time.time() - start_time) * self.process_interval_scale, BALANCE_CEILING_VALUE)
-            stage_node = stage_data.stage_node
-            if execute_result == STAGE_DATA_SKIP:
-                stage_data.stage_flag = STAGE_DATA_SKIP
+            stage_node = data.stage_node
+            if execute_result == StageDataStatus.STAGE_DATA_SKIP:
+                data.stage_flag = StageDataStatus.STAGE_DATA_SKIP
             else:
                 self.process_interval = process_interval
 
-            if execute_result == STAGE_DATA_ABSTRACT:
+            if execute_result == StageDataStatus.STAGE_DATA_ABSTRACT:
                 continue
-            elif execute_result == STAGE_DATA_CLOSE:
-                stage_data.stage_flag = STAGE_DATA_CLOSE
+            elif execute_result == StageDataStatus.STAGE_DATA_CLOSE:
+                data.stage_flag = StageDataStatus.STAGE_DATA_CLOSE
                 self.close()
             elif stage_node.next_stage is not None:
-                stage_node.to_next_stage(stage_data)
+                stage_node.to_next_stage(data)
 
             if self.balancer is not None:
                 suitable_interval = self.balancer.get_suitable_interval(process_interval, self)
-                # print(self, ":", suitable_interval)
                 if suitable_interval > 0:
                     time.sleep(suitable_interval)
 
@@ -94,6 +93,9 @@ class BaseModule(ABC):
         return p
 
     def put_stage_data(self, stage_data):
+        if self.queue is None:
+            return
+
         self.queue.put(stage_data)
         self._refresh_process_interval_scale()
 
@@ -145,7 +147,7 @@ class BaseProcessModule(BaseModule):
             time.sleep(1 / data.source_fps * (1 + self.self_balance_factor()))
         else:
             time.sleep(self.interval)
-        return STAGE_DATA_OK
+        return StageDataStatus.STAGE_DATA_OK
 
     def self_balance_factor(self):
         factor = max(-0.999, (self.queue.qsize() / 20 - 0.5) / -0.5)

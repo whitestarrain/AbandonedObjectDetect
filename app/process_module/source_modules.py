@@ -2,9 +2,9 @@ import time
 
 import cv2
 
-from app.process_module.base.stage_node import *
-from app.process_module.base.base_module \
-    import BaseModule, STAGE_DATA_CLOSE, STAGE_DATA_OK, StageData, STAGE_DATA_SKIP, STAGE_DATA_ABSTRACT
+from app.process_module.base.stage import *
+from app.process_module.base.base_module import BaseModule
+from app.process_module.base.stage import StageDataStatus
 
 
 class VideoModule(BaseModule):
@@ -24,15 +24,15 @@ class VideoModule(BaseModule):
         if not self.ret:
             if self.loop:
                 self.pre_run()
-                return STAGE_DATA_ABSTRACT
+                return StageDataStatus.STAGE_DATA_ABSTRACT
             else:
-                return STAGE_DATA_CLOSE
+                return StageDataStatus.STAGE_DATA_CLOSE
         data.source_fps = self.fps
         data.frame = self.frame
         self.ret, self.frame = self.cap.read()
-        result = STAGE_DATA_OK
+        result = StageDataStatus.STAGE_DATA_OK
         if self.skip_timer != 0:
-            result = STAGE_DATA_SKIP
+            result = StageDataStatus.STAGE_DATA_SKIP
             data.skipped = None
         skip_gap = int(self.fps * self.balancer.short_stab_interval)
         if self.skip_timer > skip_gap:

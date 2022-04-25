@@ -1,7 +1,11 @@
-STAGE_DATA_ABSTRACT = 0  # 无效数据，默认初始状态。不会进行处理
-STAGE_DATA_OK = 1  # 正常处理数据
-STAGE_DATA_CLOSE = 2  # 关闭资源后
-STAGE_DATA_SKIP = 3  # 跳帧 skip_timer。记录上一个module是否跳过处理该数据包
+from enum import Enum
+
+
+class StageDataStatus(Enum):
+    STAGE_DATA_ABSTRACT = 0  # 无效数据，默认初始状态。不会进行处理
+    STAGE_DATA_OK = 1  # 正常处理数据
+    STAGE_DATA_CLOSE = 2  # 关闭资源后
+    STAGE_DATA_SKIP = 3  # 跳帧 skip_timer。记录上一个module是否跳过处理该数据包
 
 
 class DataPackage:
@@ -17,7 +21,7 @@ class DataPackage:
 
 
 class StageData:
-    def __init__(self, stage_node, data_status=STAGE_DATA_OK):
+    def __init__(self, stage_node, data_status=StageDataStatus.STAGE_DATA_OK):
         self.data = DataPackage()
         self.stage_node = stage_node
         self.stage_flag = data_status

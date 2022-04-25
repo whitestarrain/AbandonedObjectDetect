@@ -2,6 +2,7 @@ from threading import Lock
 
 BALANCE_CEILING_VALUE = 50
 
+
 class ModuleBalancer:
     def __init__(self):
         self.max_interval = 0

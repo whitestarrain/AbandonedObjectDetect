@@ -1,6 +1,6 @@
 from app.process_module.base.base_module import BaseModule, StageNode
 from app.process_module.base.balancer import ModuleBalancer
-from app.process_module.base.stage_node import *
+from app.process_module.base.stage import *
 
 
 class DataProcessPipe(object):
