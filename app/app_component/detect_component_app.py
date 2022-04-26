@@ -238,7 +238,6 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                     data = self.frame_data_list[current_frame]
                     if current_frame < max_frame:
                         self.video_process_bar.setValue(current_frame + 1)
-                    # time.sleep(data.interval)
                 else:
                     self.stop_playing()
                     self.playing_real_time = True

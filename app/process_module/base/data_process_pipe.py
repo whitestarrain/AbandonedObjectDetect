@@ -1,5 +1,4 @@
 from app.process_module.base.base_module import BaseModule, StageNode
-from app.process_module.base.balancer import ModuleBalancer
 from app.process_module.base.stage import *
 
 
@@ -12,17 +11,13 @@ class DataProcessPipe(object):
         # 记录最新的stage，链表尾
         self.last_stage: StageNode = self.start_stage
         self.source_module = None
-        # 所有module 公用一个 balancer
-        self.balancer = ModuleBalancer()
 
     def set_source_module(self, source_module):
-        source_module.balancer = self.balancer
         self.source_module = source_module
         source_module.stage_node = self.start_stage
         return self
 
     def set_next_module(self, next_module: BaseModule):
-        next_module.balancer = self.balancer
         self.modules.append(next_module)
         next_stage = StageNode()
         # 链表 stage，指向下一个module

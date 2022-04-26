@@ -5,21 +5,17 @@ from queue import Empty
 from queue import Queue
 from threading import Thread
 
-from app.process_module.base.balancer import *
 from app.process_module.base.stage import *
 from app.process_module.base.stage import StageDataStatus
 
 
 class BaseModule(ABC):
-    def __init__(self, balancer=None, skippable=True, queueSize=50):
+    def __init__(self, skippable=True, queueSize=50):
         self.worker_thread = None
         self.running = False
         self.skippable = skippable
         self.ignore_stage_data = StageData(stage_node=None, data_status=StageDataStatus.STAGE_DATA_ABSTRACT)
         self.queue = Queue(maxsize=queueSize)
-        self.balancer: ModuleBalancer = balancer
-        self.process_interval = 0.01
-        self.process_interval_scale = 1
         print(f'created: {self}')
 
     @abstractmethod
@@ -64,14 +60,10 @@ class BaseModule(ABC):
             execute_condition = (data.stage_flag == StageDataStatus.STAGE_DATA_OK) or \
                                 (data.stage_flag == StageDataStatus.STAGE_DATA_SKIP and not self.skippable)
 
-            start_time = time.time()
             execute_result = self.process_data(data.data) if execute_condition else data.stage_flag
-            process_interval = min((time.time() - start_time) * self.process_interval_scale, BALANCE_CEILING_VALUE)
             stage_node = data.stage_node
             if execute_result == StageDataStatus.STAGE_DATA_SKIP:
                 data.stage_flag = StageDataStatus.STAGE_DATA_SKIP
-            else:
-                self.process_interval = process_interval
 
             if execute_result == StageDataStatus.STAGE_DATA_ABSTRACT:
                 continue
@@ -80,11 +72,6 @@ class BaseModule(ABC):
                 self.close()
             elif stage_node.next_stage is not None:
                 stage_node.to_next_stage(data)
-
-            # if self.balancer is not None:
-            #     suitable_interval = self.balancer.get_suitable_interval(process_interval, self)
-            #     if suitable_interval > 0:
-            #         time.sleep(suitable_interval)
 
     def start(self):
         print("run:", self)
@@ -98,15 +85,10 @@ class BaseModule(ABC):
             return
 
         self.queue.put(stage_data)
-        self._refresh_process_interval_scale()
-
-    def _refresh_process_interval_scale(self):
-        self.process_interval_scale = max(self.queue.qsize(), 1)
 
     def product_stage_data(self):
         try:
             stage_data = self.queue.get(block=True, timeout=1)
-            self._refresh_process_interval_scale()
             return stage_data
         except Empty:
             return self.ignore_stage_data

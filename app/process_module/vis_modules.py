@@ -55,31 +55,14 @@ class DataDealerModule(BaseModule):
         data.interval = interval
         self.last_time = current_time  # 更新时间
         self.push_frame_func(data)
-        # if hasattr(data, 'source_fps'):
-        #     time.sleep(1 / data.source_fps * (1 + self.self_balance_factor()))
-        # else:
-        #     time.sleep(self.interval)
         return StageDataStatus.STAGE_DATA_OK
 
-    def self_balance_factor(self):
-        factor = max(-0.999, (self.queue.qsize() / 20 - 0.5) / -0.5)
-        # print(factor)
-        return factor
-
     def product_stage_data(self):
-        # # print(self.queue.qsize(), self.size_waiting)
-        # if self.queue.qsize() == 0:
-        #     self.size_waiting = True
-        # if self.queue.qsize() > self.queue_threshold or not self.size_waiting:
-        #     self.size_waiting = False
         try:
             stage_data = self.queue.get(block=True, timeout=1)
             return stage_data
         except Empty:
             return self.ignore_stage_data
-        # else:
-        #     time.sleep(1)
-        #     return self.ignore_stage_data
 
     def put_stage_data(self, stage_data):
         if self.queue is None:

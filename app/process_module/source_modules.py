@@ -1,5 +1,3 @@
-import time
-
 import cv2
 
 from app.process_module.base.stage import *
@@ -31,15 +29,6 @@ class VideoModule(BaseModule):
         data.frame = self.frame
         self.ret, self.frame = self.cap.read()
         result = StageDataStatus.STAGE_DATA_OK
-        if self.skip_timer != 0:
-            result = StageDataStatus.STAGE_DATA_SKIP
-            data.skipped = None
-        skip_gap = int(self.fps * self.balancer.short_stab_interval)
-        if self.skip_timer > skip_gap:
-            self.skip_timer = 0
-        else:
-            self.skip_timer += 1
-        # time.sleep(self.interval)
         return result
 
     def product_stage_data(self):
