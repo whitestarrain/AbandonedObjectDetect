@@ -9,6 +9,7 @@ class VideoModule(BaseModule):
 
     def __init__(self, source=0, fps=25, skippable=False):
         super(VideoModule, self).__init__(skippable=skippable)
+        self.frame_counter = 0
         self.stage_node = None
         self.source = source
         self.cap = None
@@ -27,7 +28,9 @@ class VideoModule(BaseModule):
                 return StageDataStatus.STAGE_DATA_CLOSE
         data.source_fps = self.fps
         data.frame = self.frame
+        data.frame_counter = self.frame_counter
         self.ret, self.frame = self.cap.read()
+        self.frame_counter += 1
         result = StageDataStatus.STAGE_DATA_OK
         return result
 
@@ -50,4 +53,5 @@ class VideoModule(BaseModule):
         if self.cap.isOpened():
             self.set_fps(self.cap.get(cv2.CAP_PROP_FPS))
             self.ret, self.frame = self.cap.read()
-            print("视频源帧率: ", self.fps)
+            self.frame_counter += 1
+            print("fps: ", self.fps)

@@ -1,96 +1,30 @@
-from PyQt5.QtWidgets import QWidget, QListWidgetItem, QListWidget
-import time
-from PyQt5 import QtCore
-from enum import Enum
 import os
-from pathlib import Path
-from PIL import Image
-import cv2
-import numpy as np
-import sys
-import csv
-from itertools import islice
-from PyQt5.QtGui import QImage, QPixmap, QIcon
+from threading import Lock
 from typing import List
 
-from app.ui_component.detect_component import Ui_DetectComponent
-from threading import Thread, Lock
+import numpy as np
+from PyQt5 import QtCore
+
+from app.app_component.base_component.data_component import OffsetList
+from app.app_component.base_component.widget_component import *
+from app.entry.video_resource import VideoResource
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
-from app.process_module.source_modules import *
-from app.process_module.image_detect_module import YoloV5DetectModule
+from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
-from app.entry.video_resource import VideoResource
+from app.ui_component.detect_component import Ui_DetectComponent
+from app.app_component.base_component.utils import second2str
+from app.app_component.base_component.widget_component import CaptureListItem
 
 SOURCE_DIR_RELATIVE = "datasets/test_dataset"
 yolov5_weight = './weights/yolov5s.torchscript.pt'
 device = 'cpu'
 
 
-def second2str(seconds):
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-    return "%02d:%02d:%02d" % (h, m, s)
-
-
-class QListWidgetItemForVideo(QListWidgetItem):
-    class SourceType(Enum):
-        FILE = "file"
-        CAMERA = "camera"
-
-    def __init__(self, list_widget, name, src, type=SourceType.FILE.value):
-        """
-
-        :param list_widget:
-        :param name:
-        :param src:
-        :param type: 'file'(default) or 'camera'
-        """
-        super(QListWidgetItemForVideo, self).__init__()
-        self.list_widget: QListWidget = list_widget
-        self.type = type
-        self.setText(name + "(" + src + ")")
-        self.src = src
-
-    def add_item(self):
-        len = self.list_widget.count()
-        for i in range(len):
-            if self.list_widget.item(i).src == self.src:
-                return
-        self.list_widget.addItem(self)
-
-
-# 可以建一个buffer队列，每次处理完几帧后通过信号等方式，通知label从队列里去取处理后的每帧数据进行渲染，这样卡顿会好一些
-
-class OffsetList(list):
-    def __init__(self, seq=()):
-        super(OffsetList, self).__init__(seq)
-        self.offset = 0
-
-    def min_index(self):
-        return self.offset
-
-    def max_index(self):
-        return self.offset + len(self) - 1
-
-    def __getitem__(self, item):
-        return super(OffsetList, self).__getitem__(max(0, item - self.offset))
-
-    def append(self, __object) -> None:
-        super(OffsetList, self).append(__object)
-
-    def pop(self, **kwargs):
-        self.offset += 1
-        super(OffsetList, self).pop(0)
-
-    def clear(self) -> None:
-        self.offset = 0
-        super(OffsetList, self).clear()
-
-
 class DetectComponentApp(QWidget, Ui_DetectComponent):
     push_frame_signal = QtCore.pyqtSignal(DataPackage)
+    capture_frame_signal = QtCore.pyqtSignal(DataPackage)
 
     def __init__(self, *args, **kwargs):
         super(DetectComponentApp, self).__init__(*args, **kwargs)
@@ -137,6 +71,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
 
         # 自定义信号
         self.push_frame_signal.connect(self.push_frame)
+        self.capture_frame_signal.connect(self.capture_frame)
 
     def widget_init(self):
         """
@@ -150,7 +85,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         if (len(videos) == 0):
             return
         for file in videos:
-            QListWidgetItemForVideo(self.video_resource_file_list, file.file_name, file.source_path).add_item()
+            QListWidgetItemForVideoSource(self.video_resource_file_list, file.file_name, file.source_path).add_item()
 
     def init_video_camera_source(self):
         # 添加视频通道
@@ -158,7 +93,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         if (len(videos) == 0):
             return
         for file in videos:
-            QListWidgetItemForVideo(self.video_resource_list, file.file_name, file.source_path).add_item()
+            QListWidgetItemForVideoSource(self.video_resource_list, file.file_name, file.source_path).add_item()
 
     def open_source(self, source):
         if not os.path.exists(source):
@@ -188,6 +123,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.opened_source = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
+                .set_next_module(CaptureModule(0.1, lambda d: self.capture_frame_signal.emit(d))) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.opened_source.start()
             self.playing_real_time = True
@@ -203,6 +139,15 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.frame_data_list.clear()
             self.video_process_bar.setMaximum(-1)
             self.playing_real_time = False
+
+    def capture_frame(self, data):
+        """
+        抓拍图片
+        :param frame:
+        :param video_time:
+        :return:
+        """
+        CaptureListItem(self.capture_image_list, data.frame, data.frame_counter / data.source_fps).add_item()
 
     def push_frame(self, data):
         try:
@@ -292,6 +237,7 @@ if __name__ == '__main__':
     import qdarkstyle
     import sys
     from PyQt5.QtWidgets import QApplication, QMainWindow
+    from app.process_module.base.stage import DataPackage
 
 
     class testWindow(QMainWindow):
@@ -299,6 +245,11 @@ if __name__ == '__main__':
             super(testWindow, self).__init__(*args, **kwargs)
             self.resize(1300, 800)
             self.detect_component = DetectComponentApp()
+            data = DataPackage()
+            setattr(data, "frame", cv2.imread(r"D:\MyRepo\AbandonedObjectDetect\data\images\bus.jpg"))
+            setattr(data, "frame_counter", 60)
+            setattr(data, "source_fps", 30)
+            self.detect_component.capture_frame(data)
             self.detect_component.setObjectName("detect_component")
             # window 添加widget
             self.setCentralWidget(self.detect_component)

@@ -355,7 +355,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QListWidget" name="real_time_detect_list">
+          <widget class="QListWidget" name="capture_image_list">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
