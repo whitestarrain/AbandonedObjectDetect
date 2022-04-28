@@ -1,4 +1,5 @@
 import os
+import time
 from threading import Lock
 from typing import List
 
@@ -33,8 +34,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         self.video_source = 0
         self.frame_data_list = OffsetList()
         self.opened_source = None
-        self.playing = None
-        self.playing_real_time = False
+        self.playing_thread = None
         self.num_of_passing = 0
         self.num_of_peep = 0
         self.num_of_gazing_around = 0
@@ -123,10 +123,9 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.opened_source = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
-                .set_next_module(CaptureModule(0.1, lambda d: self.capture_frame_signal.emit(d))) \
+                .set_next_module(CaptureModule(10, lambda d: self.capture_frame_signal.emit(d))) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.opened_source.start()
-            self.playing_real_time = True
             self.open_source_lock.release()
 
         Thread(target=open_source_func, args=[self]).start()
@@ -138,7 +137,6 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.opened_source = None
             self.frame_data_list.clear()
             self.video_process_bar.setMaximum(-1)
-            self.playing_real_time = False
 
     def capture_frame(self, data):
         """
@@ -152,8 +150,6 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
     def push_frame(self, data):
         try:
             max_index = self.frame_data_list.max_index()
-            time_process = self.frame_data_list[max_index].time_process if len(self.frame_data_list) > 0 else 0
-            data.time_process = time_process + data.interval
             # 添加帧到视频帧列表
             self.frame_data_list.append(data)
             while len(self.frame_data_list) > 500:
@@ -161,39 +157,31 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.video_process_bar.setMinimum(self.frame_data_list.min_index())
             self.video_process_bar.setMaximum(self.frame_data_list.max_index())
 
-            # data.frame_num = max_index + 1
-            # if data.num_of_cheating > 0 and self.check_cheating_change(data):
-            #     self.add_cheating_list_signal.emit(data)
-
-            # 判断是否进入实时播放状态
-            if self.playing_real_time:
-                self.video_process_bar.setValue(self.video_process_bar.maximum())
-
         except Exception as e:
             print(e)
 
     def playing_video(self):
         try:
-            while self.playing is not None and not self.playing_real_time:
+            while self.playing_thread is not None:
                 current_frame = self.video_process_bar.value()
                 max_frame = self.video_process_bar.maximum()
                 if current_frame < 0:
-                    continue
-                elif current_frame < max_frame:
+                    current_frame = 0
+                elif current_frame <= max_frame:
                     data = self.frame_data_list[current_frame]
                     if current_frame < max_frame:
+                        time.sleep(1 / data.source_fps)
                         self.video_process_bar.setValue(current_frame + 1)
                 else:
                     self.stop_playing()
-                    self.playing_real_time = True
         except Exception as e:
             print(e)
 
     def play_video(self):
-        if self.playing is not None:
+        if self.playing_thread is not None:
             return
-        self.playing = Thread(target=self.playing_video, args=())
-        self.playing.start()
+        self.playing_thread = Thread(target=self.playing_video, args=())
+        self.playing_thread.start()
 
     def change_frame(self):
         try:
@@ -201,11 +189,9 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                 return
             current_frame = self.video_process_bar.value()
             max_frame = self.video_process_bar.maximum()
-            self.playing_real_time = current_frame == max_frame  # 是否开启实时播放
             # 更新界面
             data = self.frame_data_list[current_frame]
             maxData = self.frame_data_list[max_frame]
-            # frame = data.frame_anno if self.show_box.isChecked() else data.frame
             frame = data.frame
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = cv2.resize(frame, (self.video_screen.width() - 9, self.video_screen.height() - 9))  # 调整图像大小
@@ -215,17 +201,17 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                            QImage.Format_RGB888)
             self.video_screen.setPixmap(QPixmap.fromImage(frame))
             # 显示时间
-            current_time_process = second2str(data.time_process)
-            max_time_process = second2str(maxData.time_process)
+            current_time_process = second2str(data.frame_counter / data.source_fps)
+            max_time_process = second2str(maxData.frame_counter / maxData.source_fps)
 
             self.time_process_label.setText(f"{current_time_process}/{max_time_process}")
         except Exception as e:
             print(e)
 
     def stop_playing(self):
-        if self.playing is not None:
+        if self.playing_thread is not None:
             # thread 设置为None之后就就出循环了
-            self.playing = None
+            self.playing_thread = None
 
     def close(self):
         print("closing:", self)
