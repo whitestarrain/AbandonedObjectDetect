@@ -179,6 +179,20 @@ class CaptureModule(BaseModule):
         super(CaptureModule, self).pre_run()
 
 
+class AbandonedObjectDetectModule(BaseModule):
+
+    def __init__(self, analyze_period=10):
+        super(AbandonedObjectDetectModule, self).__init__()
+        self.analyze_period = analyze_period
+        self.fps = None
+
+    def process_data(self, data):
+        pass
+
+    def pre_run(self):
+        pass
+
+
 if __name__ == '__main__':
     import numpy as np
 
