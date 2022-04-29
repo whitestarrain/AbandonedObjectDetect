@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 import torch
+from sanic.response import json
+import json
+import requests
+from app.service.deploy_host_conf_service import DeployHostConfService
 
 from app.process_module.base.base_module import *
 from utils.augmentations import letterbox
@@ -13,6 +17,10 @@ opt = get_opt()
 
 
 class YoloV5DetectModule(BaseModule):
+    """
+    本机检测
+    """
+
     def __init__(self, skippable=True):
         super(YoloV5DetectModule, self).__init__(skippable=skippable)
         self.parse_opt(**vars(opt))
@@ -145,6 +153,35 @@ class YoloV5DetectModule(BaseModule):
         super(YoloV5DetectModule, self).pre_run()
 
 
+class YoloV5DetectRemoteModule(BaseModule):
+    """
+    调用detect服务器，获取检测结果
+    """
+
+    def __init__(self, skippable=True):
+        super(YoloV5DetectRemoteModule, self).__init__(skippable=skippable)
+        self.deploy_host_conf_service = DeployHostConfService(interval=10)
+        self.deploy_host_conf_service.start_update()
+
+    def process_data(self, data):
+        host_conf = self.deploy_host_conf_service.get_host_conf()
+        request_data = json.dumps(data.frame.tolist())
+        response = requests.post(f"http://{host_conf.host}:{host_conf.port}{host_conf.uri}", data={
+            "data": request_data
+        })
+        resp_data = json.loads(response._content)
+        data.pred = resp_data["pred"]
+        data.names = resp_data["names"]
+        return StageDataStatus.STAGE_DATA_OK
+
+    def pre_run(self):
+        super(YoloV5DetectRemoteModule, self).pre_run()
+
+    def close(self):
+        super(YoloV5DetectRemoteModule, self).close()
+        self.deploy_host_conf_service.stop_update()
+
+
 class CaptureModule(BaseModule):
 
     def __init__(self, time_threshold, capture_frame_function):
@@ -180,6 +217,10 @@ class CaptureModule(BaseModule):
 
 
 class AbandonedObjectDetectModule(BaseModule):
+    """
+    遗留物分析
+    关注人和行李进行分析
+    """
 
     def __init__(self, analyze_period=10):
         super(AbandonedObjectDetectModule, self).__init__()

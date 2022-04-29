@@ -11,7 +11,7 @@ from app.app_component.base_component.widget_component import *
 from app.entry.video_resource import VideoResource
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
-from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule
+from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule,YoloV5DetectRemoteModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
 from app.ui_component.detect_component import Ui_DetectComponent
@@ -122,7 +122,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             fps = 12
             self.opened_source = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
-                .set_next_module(YoloV5DetectModule(skippable=False)) \
+                .set_next_module(YoloV5DetectRemoteModule(skippable=True)) \
                 .set_next_module(CaptureModule(10, lambda d: self.capture_frame_signal.emit(d))) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.opened_source.start()

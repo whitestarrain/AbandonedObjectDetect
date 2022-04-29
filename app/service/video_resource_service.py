@@ -1,4 +1,4 @@
-from app.service.DaoUtils import DaoUtils
+from app.service.dao_utils import DaoUtils
 from app.entry.video_resource import VideoResource
 from enum import Enum
 

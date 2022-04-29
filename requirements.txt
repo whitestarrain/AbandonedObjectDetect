@@ -40,3 +40,6 @@ PyQt5
 qdarkstyle
 mysql-connector-python
 sqlalchemy
+
+# server
+sanic
