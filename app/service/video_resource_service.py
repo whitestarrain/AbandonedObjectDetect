@@ -1,6 +1,7 @@
-from app.service.dao_utils import DaoUtils
-from app.entry.video_resource import VideoResource
 from enum import Enum
+
+from app.entry.video_resource import VideoResource
+from app.service.dao_utils import DaoUtils
 
 
 class VideoResourceType(Enum):

@@ -1,17 +1,16 @@
+import json
+
 import cv2
-import numpy as np
+import requests
 import torch
 from sanic.response import json
-import json
-import requests
-from app.service.deploy_host_conf_service import DeployHostConfService
 
 from app.process_module.base.base_module import *
-from utils.augmentations import letterbox
+from app.process_module.base.stage import StageDataStatus
+from app.service.deploy_host_conf_service import DeployHostConfService
 from detect import parse_opt as get_opt, ROOT, select_device, Path, check_suffix, attempt_load, load_classifier, \
     check_img_size, non_max_suppression, scale_coords
-
-from app.process_module.base.stage import StageDataStatus
+from utils.augmentations import letterbox
 
 opt = get_opt()
 
@@ -220,6 +219,8 @@ class AbandonedObjectDetectModule(BaseModule):
     """
     遗留物分析
     关注人和行李进行分析
+    使用聚类算法?
+    还是图片相似度？
     """
 
     def __init__(self, analyze_period=10):

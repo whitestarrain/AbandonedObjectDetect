@@ -1,5 +1,4 @@
 import os
-import time
 from threading import Lock
 from typing import List
 
@@ -8,15 +7,15 @@ from PyQt5 import QtCore
 
 from app.app_component.base_component.data_component import OffsetList
 from app.app_component.base_component.widget_component import *
+from app.app_component.base_component.widget_component import CaptureListItem
 from app.entry.video_resource import VideoResource
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
-from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule,YoloV5DetectRemoteModule
+from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
 from app.ui_component.detect_component import Ui_DetectComponent
-from app.app_component.base_component.utils import second2str
-from app.app_component.base_component.widget_component import CaptureListItem
+from app.utils import second2str
 
 SOURCE_DIR_RELATIVE = "datasets/test_dataset"
 yolov5_weight = './weights/yolov5s.torchscript.pt'

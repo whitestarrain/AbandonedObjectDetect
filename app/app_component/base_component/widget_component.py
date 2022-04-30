@@ -1,12 +1,10 @@
-from PyQt5.QtWidgets import QListWidgetItem, QListWidget
-
 from PyQt5.QtCore import QSize
-from PyQt5.QtGui import QImage, QPixmap, QIcon
-from PyQt5.QtWidgets import QListWidgetItem, QWidget, QListWidget, QInputDialog, QLineEdit, QMessageBox
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QListWidgetItem, QWidget, QListWidget
 
-from app.ui_component.capture_item_component import Ui_CaptureItem
 from app.process_module.source_modules import *
-from app.app_component.base_component.utils import *
+from app.ui_component.capture_item_component import Ui_CaptureItem
+from app.utils import *
 
 
 class CaptureItemWidget(QWidget, Ui_CaptureItem):

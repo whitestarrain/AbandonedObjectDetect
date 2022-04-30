@@ -1,5 +1,5 @@
-from app.service.dao_utils import DaoUtils
 from app.entry.user import User
+from app.service.dao_utils import DaoUtils
 
 
 class UserDao(object):

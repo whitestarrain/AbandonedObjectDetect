@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtGui
-from app.ui_component.abandoned_object_detect import Ui_AbandonedObjectDetect
+
 from app.app_component.detect_component_app import DetectComponentApp
+from app.ui_component.abandoned_object_detect import Ui_AbandonedObjectDetect
 
 
 class AbandonedObjectDetectApp(QMainWindow, Ui_AbandonedObjectDetect):

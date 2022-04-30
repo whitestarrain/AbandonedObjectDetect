@@ -100,35 +100,35 @@ class Ui_DetectComponent(object):
         self.video_process_bar = QtWidgets.QSlider(DetectComponent)
         self.video_process_bar.setAutoFillBackground(False)
         self.video_process_bar.setStyleSheet("QSlider {\n"
-"                                                    background-color: rgba(22, 22, 22, 0.7);\n"
-"                                                    border-radius: 5px;\n"
-"                                                    }\n"
-"\n"
-"                                                    QSlider::sub-page:horizontal {\n"
-"                                                    background-color: #FF7826;\n"
-"                                                    height:4px;\n"
-"                                                    border-radius: 2px;\n"
-"                                                    }\n"
-"\n"
-"                                                    QSlider::add-page:horizontal {\n"
-"                                                    background-color: #7A7B79;\n"
-"                                                    height:4px;\n"
-"                                                    border-radius: 2px;\n"
-"                                                    }\n"
-"\n"
-"                                                    QSlider::groove:horizontal {\n"
-"                                                    background:transparent;\n"
-"                                                    height:10px;\n"
-"                                                    }\n"
-"\n"
-"                                                    QSlider::handle:horizontal {\n"
-"                                                    height: 10px;\n"
-"                                                    width: 10px;\n"
-"                                                    margin: 0px -2px 0px -2px;\n"
-"                                                    border-radius: 5px;\n"
-"                                                    background: white;\n"
-"                                                    }\n"
-"                                                ")
+                                             "                                                    background-color: rgba(22, 22, 22, 0.7);\n"
+                                             "                                                    border-radius: 5px;\n"
+                                             "                                                    }\n"
+                                             "\n"
+                                             "                                                    QSlider::sub-page:horizontal {\n"
+                                             "                                                    background-color: #FF7826;\n"
+                                             "                                                    height:4px;\n"
+                                             "                                                    border-radius: 2px;\n"
+                                             "                                                    }\n"
+                                             "\n"
+                                             "                                                    QSlider::add-page:horizontal {\n"
+                                             "                                                    background-color: #7A7B79;\n"
+                                             "                                                    height:4px;\n"
+                                             "                                                    border-radius: 2px;\n"
+                                             "                                                    }\n"
+                                             "\n"
+                                             "                                                    QSlider::groove:horizontal {\n"
+                                             "                                                    background:transparent;\n"
+                                             "                                                    height:10px;\n"
+                                             "                                                    }\n"
+                                             "\n"
+                                             "                                                    QSlider::handle:horizontal {\n"
+                                             "                                                    height: 10px;\n"
+                                             "                                                    width: 10px;\n"
+                                             "                                                    margin: 0px -2px 0px -2px;\n"
+                                             "                                                    border-radius: 5px;\n"
+                                             "                                                    background: white;\n"
+                                             "                                                    }\n"
+                                             "                                                ")
         self.video_process_bar.setMinimum(-1)
         self.video_process_bar.setMaximum(-1)
         self.video_process_bar.setProperty("value", -1)
@@ -141,7 +141,7 @@ class Ui_DetectComponent(object):
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
         self.time_process_label = QtWidgets.QLabel(DetectComponent)
         self.time_process_label.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.time_process_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.time_process_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.time_process_label.setObjectName("time_process_label")
         self.horizontalLayout_11.addWidget(self.time_process_label)
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -220,7 +220,7 @@ class Ui_DetectComponent(object):
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_14.addWidget(self.label_4)
         self.label_15 = QtWidgets.QLabel(DetectComponent)
-        self.label_15.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_15.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.label_15.setObjectName("label_15")
         self.horizontalLayout_14.addWidget(self.label_15)
         self.abandoned_object_max_num = QtWidgets.QSpinBox(DetectComponent)

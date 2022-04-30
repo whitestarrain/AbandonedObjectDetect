@@ -1,5 +1,5 @@
 import threading
-import time
+
 from app.entry.deploy_host_conf import DeployHostConf
 from app.service.dao_utils import DaoUtils
 

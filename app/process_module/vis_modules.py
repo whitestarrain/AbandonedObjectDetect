@@ -2,10 +2,10 @@ import copy
 import time
 from abc import abstractmethod
 from queue import Empty
+
 import cv2
 
 from app.process_module.base.base_module import BaseModule
-
 from app.process_module.base.stage import StageDataStatus, DataPackage
 
 
