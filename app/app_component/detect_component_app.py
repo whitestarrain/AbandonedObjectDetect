@@ -68,6 +68,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         self.play_video_btn.clicked.connect(self.play_video)
         self.stop_playing_btn.clicked.connect(self.stop_playing)
         self.video_process_bar.valueChanged.connect(self.change_frame)
+        self.show_box.clicked.connect(self.draw_box_flag_controller)
+        self.show_person_box.clicked.connect(self.draw_box_flag_controller)
 
         # 自定义信号
         self.push_frame_signal.connect(self.push_frame)
@@ -120,12 +122,12 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         # 启动视频源
         def open_source_func(self):
             fps = 12
-            self.opened_source = DataProcessPipe() \
+            self.process_pipe_line = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
                 .set_next_module(CaptureModule(10, lambda d: self.capture_frame_signal.emit(d))) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
-            self.opened_source.start()
+            self.process_pipe_line.start()
             self.open_source_lock.release()
 
         Thread(target=open_source_func, args=[self]).start()
@@ -217,6 +219,13 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         print("closing:", self)
         self.close_source()
         super(DetectComponentApp, self).close()
+
+    def draw_box_flag_controller(self):
+        for module in self.process_pipe_line.modules:
+            if isinstance(module, ObjectDetectVisModule):
+                setattr(module, "show_box", self.show_box.isChecked())
+                setattr(module, "show_person_box", self.show_person_box.isChecked())
+                return
 
 
 if __name__ == '__main__':

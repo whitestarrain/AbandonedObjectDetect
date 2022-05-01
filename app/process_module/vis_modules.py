@@ -77,6 +77,8 @@ class ObjectDetectVisModule(DataDealerModule):
 
     def __init__(self, push_frame_func, interval=0.06, skippable=False):
         super(ObjectDetectVisModule, self).__init__(push_frame_func, interval, skippable)
+        self.show_box = True
+        self.show_person_box = True
 
     def deal_skipped_data(self, data: DataPackage, last_data: DataPackage) -> DataPackage:
         frame = data.frame
@@ -86,6 +88,9 @@ class ObjectDetectVisModule(DataDealerModule):
         return data
 
     def draw_frame(self, data, fps):
+        if not self.show_box:
+            return
+
         pred = data.pred[0]
         dim0 = len(pred)
         for i in range(dim0):
@@ -96,6 +101,8 @@ class ObjectDetectVisModule(DataDealerModule):
             conf = "%.2f" % float(pred[i][4], )
             cls = int(pred[i][5])
             label = str(data.names[cls])
+            if label == "person" and not self.show_person_box:
+                continue
             draw_box_and_labels(data.frame, x1, y1, x2, y2, label, conf)
         # frame = data.frame.copy()
         # data.frame_anno = frame  # 保存绘制过的图像
