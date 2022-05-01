@@ -1,6 +1,7 @@
 import json
 
 import cv2
+import numpy as np
 import requests
 import torch
 from sanic.response import json
