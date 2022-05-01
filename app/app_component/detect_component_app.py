@@ -33,7 +33,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
 
         self.video_source = 0
         self.frame_data_list = OffsetList()
-        self.opened_source = None
+        self.process_pipe_line = None
         self.playing_thread = None
         self.num_of_passing = 0
         self.num_of_peep = 0
@@ -101,8 +101,9 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         if not os.path.exists(source):
             source = int(source)
         self.open_source_lock.acquire(blocking=True)
-        if self.opened_source is not None:
+        if self.process_pipe_line is not None:
             self.close_source()
+
         # Loading
         frame = np.zeros((480, 640, 3), np.uint8)
         (f_w, f_h), _ = cv2.getTextSize("Loading", cv2.FONT_HERSHEY_TRIPLEX, 1, 2)
@@ -133,10 +134,10 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         Thread(target=open_source_func, args=[self]).start()
 
     def close_source(self):
-        if self.opened_source is not None:
+        if self.process_pipe_line is not None:
             self.stop_playing()
-            self.opened_source.close()
-            self.opened_source = None
+            self.process_pipe_line.close()
+            self.process_pipe_line = None
             self.frame_data_list.clear()
             self.video_process_bar.setMaximum(-1)
 
@@ -211,9 +212,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             print(e)
 
     def stop_playing(self):
-        if self.playing_thread is not None:
-            # thread 设置为None之后就就出循环了
-            self.playing_thread = None
+        self.playing_thread = None
 
     def close(self):
         print("closing:", self)
