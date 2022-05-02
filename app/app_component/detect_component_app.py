@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from PyQt5 import QtCore
 
-from app.app_component.base_component.data_component import OffsetList
+from app.utils import BufferList
 from app.app_component.base_component.widget_component import *
 from app.app_component.base_component.widget_component import CaptureListItem
 from app.entry.video_resource import VideoResource
@@ -32,7 +32,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         self.setupUi(self)
 
         self.video_source = 0
-        self.frame_data_list = OffsetList()
+        self.frame_data_list = BufferList()
         self.process_pipe_line = None
         self.playing_thread = None
         self.num_of_passing = 0

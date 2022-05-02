@@ -1,4 +1,7 @@
 import json
+import sys
+import time
+from typing import List
 
 import cv2
 import numpy as np
@@ -6,9 +9,11 @@ import requests
 import torch
 from sanic.response import json
 
+from app.conf import baggage_classes, person_class
 from app.process_module.base.base_module import *
 from app.process_module.base.stage import StageDataStatus
 from app.service.deploy_host_conf_service import DeployHostConfService
+from app.utils import LimitQueue, get_point_center_distance
 from detect import parse_opt as get_opt, ROOT, select_device, Path, check_suffix, attempt_load, load_classifier, \
     check_img_size, non_max_suppression, scale_coords
 from utils.augmentations import letterbox
@@ -216,29 +221,180 @@ class CaptureModule(BaseModule):
         super(CaptureModule, self).pre_run()
 
 
-class AbandonedObjectDetectModule(BaseModule):
+class TimeSequenceAnalyzeList(object):
+    """
+    每一个物品对应需要维护的一个时间序列的检测结果
+    """
+
+    def __init__(self, max_length):
+        super(TimeSequenceAnalyzeList, self).__init__()
+        self.max_length = max_length
+        self.lose_anno_tolerate = int(max_length / 4)  # 变为0之后会删除，表示检测序列失效
+        self.init_time = time.time()
+        self.update_time = self.init_time
+        self.cls = None
+        self.pred_list = LimitQueue(max_length)  # 该物品的检测序列
+
+    def lose_anno(self):
+        """
+        有一帧没有检测到
+        :return:
+        """
+        self.lose_anno_tolerate -= 1
+
+    def add_pred_item(self, pred_item):
+        self.pred_list.append(pred_item)
+        self.update_time = time.time()
+        if self.cls is None:
+            self.cls = int(pred_item[5])
+
+    def get_latest_pred(self):
+        return self.pred_list[len(self.pred_list) - 1]
+
+    def __len__(self):
+        return len(self.pred_list)
+
+    def pop(self, i):
+        if len(self.pred_list) == 0:
+            return None
+        return self.pred_list.pop(i)
+
+
+class AbandonedObjectAnalysesModule(BaseModule):
     """
     遗留物分析
     关注人和行李进行分析
-    使用聚类算法?
-    还是图片相似度？
+    时间序列上的聚类算法。哪一帧缺失也不会影响计算结果。主要逻辑就是刻画上一帧到当前帧，遗留物的移动轨迹
+    opencv跟踪，可能会出现过多行李，影响计算速度。
     """
 
-    def __init__(self, analyze_period=10):
-        super(AbandonedObjectDetectModule, self).__init__()
-        self.analyze_period = analyze_period
+    def __init__(self, analyze_period=5):
+        super(AbandonedObjectAnalysesModule, self).__init__()
+        self.analyze_period = analyze_period  # 判断为遗留物的时间段
+        self.analyze_length = None  # analyze_period  * fps
+        self.time_sequence_analyze = LimitQueue(100)  # 判断为同一物品的放在一起，在视频播放过程中进行维护
         self.fps = None
+        self.object_pred_list = List[TimeSequenceAnalyzeList]()
+
+    @staticmethod
+    def filter_baggage_and_person(pred):
+        pred_baggage = []
+        pred_person = []
+        pred = pred[0]  # 取第一张图片检测结果
+        dim0 = len(pred)
+        for i in range(dim0):
+            cls = int(pred[i][5])
+            label = str(pred.names[cls])
+            if label in baggage_classes:
+                pred_baggage.append(pred[i])
+            if label in person_class:
+                pred_person.append(pred[i])
+
+        return np.array(pred_baggage), np.array(pred_person)
+
+    def put_into_nearest_point(self, pred_baggages):
+        """
+        将pred中的结果放到self.time_sequence_analyze 中
+
+        两种情况： 1. 判断为遗留物的物品被拿走
+                 2. 行李只在镜头中停留或者移动一瞬间。
+
+        :param pred_baggages:
+        :return:
+        """
+        if self.analyze_length is None:
+            raise Exception("没有确定判定时间或fps")
+
+        timestamp = time.time()
+
+        # 同类的遗留物构建进行分析
+        # 同类的遗留物中，根据每帧前后的距离，判断是否是同一物品。两帧之间，物品的距离移动不得超过 一定值
+        for baggage_anno in pred_baggages:
+            if len(self.object_pred_list) == 0:
+                seq = TimeSequenceAnalyzeList(self.analyze_length)
+                seq.add_pred_item(baggage_anno)
+                self.object_pred_list.append(seq)
+
+            nearest_index = -1
+            nearest_distance = sys.maxsize
+            for i in range(len(self.object_pred_list)):
+                time_seq = self.object_pred_list[i]
+                # 非同一类跳过
+                if int(baggage_anno[5]) != time_seq.cls:
+                    continue
+
+                last_pred = time_seq.get_latest_pred()
+                # 距离判断远近
+                distance = get_point_center_distance(baggage_anno[:4], last_pred[:4])
+                if distance < nearest_distance:
+                    nearest_distance = distance
+                    nearest_index = i
+
+            if -1 == nearest_distance or nearest_distance > max(abs(baggage_anno[0] - baggage_anno[2]),
+                                                                abs(baggage_anno[1] - baggage_anno[3])):
+                # 最短距离也太长，与上一个任何一个没有对应的，新建自己的序列
+                seq = TimeSequenceAnalyzeList(self.analyze_length)
+                seq.add_pred_item(baggage_anno)
+                self.object_pred_list.append(seq)
+
+            else:
+                # 否则，最近的存入time_sequence_analyze
+                self.object_pred_list[nearest_index].add_pred_item(baggage_anno)
+
+        # 当一个物品的时间序列队列不足1/2，同时此时又有1/4次没有检测到，针对遗留物移动除去的情况 todo: 参数调节
+        # 是为了既不会因为偶尔的遮挡导致跟踪不到，同时可以及时清除无用的物品检测序列
+        for i in range(len(self.object_pred_list)):
+            seq = self.object_pred_list[i]
+            if seq.update_time < timestamp:  # 更新过的序列，update_time应该大于timestamp
+                seq.lose_anno_tolerate -= 1
+                # 没有插入新检测结果，删除最旧的检测记录。针对行李只出现一瞬间的情况
+                seq.pop(0)
+
+            if len(seq) == 0:
+                self.object_pred_list.pop(i)
+            elif len(seq) < seq.max_length / 2 and seq.lose_anno_tolerate <= 0:
+                self.object_pred_list.pop(i)
+
+    def analyse_abandoned_object(self, pred_person):
+        """
+        self.pred_list分析
+        维护self.time_sequence_analyze
+        时间序列上，同类遗留物
+        :return:
+        """
+        # todo
+
+        # 针对每一个物品进行分析
+        # 移动距离小于物品长与宽，判断为遗留物
+
+        # 遗留物消失（被遮挡）一定时间后，
+
+        # 如果周围有人，则不为遗留物
+
+        return []
 
     def process_data(self, data):
-        pass
+        # pred_baggage记录在 object_pred_list ,pred_person不进行记录
+        pred_baggage, pred_person = self.filter_baggage_and_person(data)
+
+        if self.fps is None:
+            self.fps = data.fps
+            max_length = int(self.fps * self.analyze_period)
+
+            self.analyze_length = max_length
+
+            self.time_sequence_analyze = LimitQueue(max_length)
+
+        self.put_into_nearest_point(pred_baggage)
+
+        data.analyse_result = self.analyse_abandoned_object(pred_person)
+        return StageDataStatus.STAGE_DATA_OK
 
     def pre_run(self):
-        pass
+        super(AbandonedObjectAnalysesModule, self).pre_run()
 
 
-if __name__ == '__main__':
-    import numpy as np
-
+def _test_detect_module():
     detect_module = YoloV5DetectModule(opt)
     frame = cv2.imread(r"D:\MyRepo\AbandonedObjectDetect\data\images\bus.jpg")
     pred: torch.Tensor = detect_module.detect(frame)[0]
@@ -297,3 +453,13 @@ if __name__ == '__main__':
     # # When everything done, release the capture
     # cap.release()
     # cv.destroyAllWindows()
+
+
+def _test_analyses_module():
+    analyse_module = AbandonedObjectAnalysesModule()
+    pass
+
+
+if __name__ == '__main__':
+    # _test_detect_module()
+    _test_analyses_module()

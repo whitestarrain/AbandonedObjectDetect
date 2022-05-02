@@ -18,7 +18,6 @@ class BaseModule(ABC):
 
     @abstractmethod
     def process_data(self, data):
-        print("BaseModule process data", self)
         pass
 
     @abstractmethod

@@ -10,7 +10,7 @@ class VideoModule(BaseModule):
     def __init__(self, source=0, fps=25, skippable=False):
         super(VideoModule, self).__init__(skippable=skippable)
         self.frame_counter = 0
-        self.stage_node = None
+        self.stage_node = None  # DataProcessPipe中初始化
         self.source = source
         self.cap = None
         self.frame = None
