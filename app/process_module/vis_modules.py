@@ -65,6 +65,8 @@ class ObjectDetectVisModule(DataDealerModule):
         self.show_person_box = True
 
     def draw_frame(self, data):
+
+        # todo  analyse_result 分析出的遗留物进行标记
         if not self.show_box:
             return
 

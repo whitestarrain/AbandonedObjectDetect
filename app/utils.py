@@ -59,6 +59,9 @@ class LimitQueue(list):
     def set_maxlength(self, max_length):
         self.max_length = max_length
 
+    def get_last_item(self):
+        return self[len(self) - 1]
+
 
 def get_point_center_distance(p1, p2):
     """
