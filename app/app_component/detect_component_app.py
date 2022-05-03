@@ -6,7 +6,6 @@ from typing import List
 import numpy as np
 from PyQt5 import QtCore
 
-from app.utils import BufferList
 from app.app_component.base_component.widget_component import *
 from app.app_component.base_component.widget_component import CaptureListItem
 from app.entry.video_resource import VideoResource
@@ -152,11 +151,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
 
     def push_frame(self, data):
         try:
-            max_index = self.frame_data_list.max_index()
             # 添加帧到视频帧列表
             self.frame_data_list.append(data)
-            while len(self.frame_data_list) > 500:
-                self.frame_data_list.pop()
             self.video_process_bar.setMinimum(self.frame_data_list.min_index())
             self.video_process_bar.setMaximum(self.frame_data_list.max_index())
 
@@ -172,8 +168,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                     current_frame = 0
                 elif current_frame <= max_frame:
                     data = self.frame_data_list[current_frame]
+                    time.sleep(1 / data.source_fps)  # 该句一定要放在下面的if之上。否则current_frame==max_frame时，cpu空转，导致浪费cpu资源
                     if current_frame < max_frame:
-                        time.sleep(1 / data.source_fps)
                         self.video_process_bar.setValue(current_frame + 1)
                 else:
                     self.stop_playing()

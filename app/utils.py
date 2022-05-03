@@ -12,7 +12,7 @@ class BufferList(list):
     只存储一定长度的数据，但是记录存过多少数据。
     """
 
-    def __init__(self, seq=()):
+    def __init__(self, seq=(), max_length=500):
         super(BufferList, self).__init__(seq)
         self.offset = 0
 
@@ -27,6 +27,8 @@ class BufferList(list):
 
     def append(self, __object) -> None:
         super(BufferList, self).append(__object)
+        while len(self) > 500:
+            self.pop()
 
     def pop(self, **kwargs):
         self.offset += 1

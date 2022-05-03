@@ -1,4 +1,3 @@
-import copy
 import time
 from abc import abstractmethod
 from queue import Empty
@@ -6,7 +5,7 @@ from queue import Empty
 import cv2
 
 from app.process_module.base.base_module import BaseModule
-from app.process_module.base.stage import StageDataStatus, DataPackage
+from app.process_module.base.stage import StageDataStatus
 
 
 def draw_box_and_labels(frame, x1, y1, x2, y2, label, conf):
@@ -31,29 +30,14 @@ class DataDealerModule(BaseModule):
         self.interval = interval
         self.size_waiting = True
 
-        #
         self.queue_threshold = 10
 
     @abstractmethod
-    def deal_skipped_data(self, data: DataPackage, last_data: DataPackage) -> DataPackage:
-        pass
-
-    @abstractmethod
-    def draw_frame(self, data, fps):
+    def draw_frame(self, data):
         pass
 
     def process_data(self, data):
-        if hasattr(data, 'skipped') and self.last_data is not None:
-            data = self.deal_skipped_data(data, copy.copy(self.last_data))
-        else:
-            self.last_data = data
-        current_time = time.time()
-        interval = (current_time - self.last_time)
-        fps = 1 / interval
-        data.fps = fps
-        self.draw_frame(data, fps=fps)
-        data.interval = interval
-        self.last_time = current_time  # 更新时间
+        self.draw_frame(data)
         self.push_frame_func(data)
         return StageDataStatus.STAGE_DATA_OK
 
@@ -80,14 +64,7 @@ class ObjectDetectVisModule(DataDealerModule):
         self.show_box = True
         self.show_person_box = True
 
-    def deal_skipped_data(self, data: DataPackage, last_data: DataPackage) -> DataPackage:
-        frame = data.frame
-        data = last_data
-        data.skipped = None
-        data.frame = frame
-        return data
-
-    def draw_frame(self, data, fps):
+    def draw_frame(self, data):
         if not self.show_box:
             return
 
