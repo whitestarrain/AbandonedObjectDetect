@@ -246,3 +246,6 @@ fabric.properties
 
 # application
 app/temp/*
+
+# test temp
+temp

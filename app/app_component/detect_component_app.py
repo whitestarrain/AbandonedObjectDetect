@@ -31,7 +31,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         self.setupUi(self)
 
         self.video_source = 0
-        self.frame_data_list = BufferList()
+        self.frame_data_list = BufferList(max_length=50)
         self.process_pipe_line = None
         self.playing_thread = None
         self.num_of_passing = 0
@@ -57,8 +57,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         """
 
         self.open_source_btn.clicked.connect(
-            lambda: self.open_source(self.video_now_source_path.label()
-                                     if len(self.video_now_source_path.label()) != 0 else 0))
+            lambda: self.open_source(self.video_now_source_path.text()
+                                     if len(self.video_now_source_path.text()) != 0 else 0))
 
         self.video_resource_list.itemClicked.connect(lambda item: self.open_source(item.src))
         self.video_resource_file_list.itemClicked.connect(lambda item: self.open_source(item.src))
