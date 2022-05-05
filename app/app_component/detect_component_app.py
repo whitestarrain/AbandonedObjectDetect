@@ -9,9 +9,11 @@ from PyQt5 import QtCore
 from app.app_component.base_component.widget_component import *
 from app.app_component.base_component.widget_component import CaptureListItem
 from app.entry.video_resource import VideoResource
+from app.process_module.analyze_module import AbandonedObjectAnalysesModule
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
-from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule, AbandonedObjectAnalysesModule
+from app.process_module.image_detect_module import YoloV5DetectModule
+from app.process_module.util_module import CaptureModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
 from app.ui_component.detect_component import Ui_DetectComponent
