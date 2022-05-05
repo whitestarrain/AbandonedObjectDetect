@@ -27,6 +27,7 @@ device = 'cpu'
 class DetectComponentApp(QWidget, Ui_DetectComponent):
     push_frame_signal = QtCore.pyqtSignal(DataPackage)
     capture_frame_signal = QtCore.pyqtSignal(DataPackage)
+    abandoned_object_list_add_signal = QtCore.pyqtSignal()
 
     def __init__(self, *args, **kwargs):
         super(DetectComponentApp, self).__init__(*args, **kwargs)
@@ -75,6 +76,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         # 自定义信号
         self.push_frame_signal.connect(self.push_frame)
         self.capture_frame_signal.connect(self.capture_frame)
+        self.abandoned_object_list_add_signal.connect(self.add_abandoned_item)
 
     def widget_init(self):
         """
@@ -127,7 +129,8 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.process_pipe_line = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
-                .set_next_module(AbandonedObjectAnalysesModule(analyze_period=1)) \
+                .set_next_module(AbandonedObjectAnalysesModule(lambda: self.abandoned_object_list_add_signal.emit(),
+                                                               analyze_period=1)) \
                 .set_next_module(CaptureModule(10, lambda d: self.capture_frame_signal.emit(d))) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.process_pipe_line.start()
@@ -225,6 +228,10 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                 setattr(module, "show_person_box", self.show_person_box.isChecked())
                 return
 
+    def add_abandoned_item(self):
+        text = "%s 检测到遗留物" % time.strftime("%Y{y}%m{m}%d{d} %H:%M:%S").format(y="年", m="月", d="日")
+        self.abandoned_object_ist.insertItem(0, QListWidgetItem(text, self.abandoned_object_ist))
+
 
 if __name__ == '__main__':
     import qdarkstyle
@@ -233,23 +240,28 @@ if __name__ == '__main__':
     from app.process_module.base.stage import DataPackage
 
 
-    class testWindow(QMainWindow):
-        def __init__(self, *args, **kwargs):
-            super(testWindow, self).__init__(*args, **kwargs)
-            self.resize(1300, 800)
-            self.detect_component = DetectComponentApp()
-            data = DataPackage()
-            setattr(data, "frame", cv2.imread(r"D:\MyRepo\AbandonedObjectDetect\data\images\bus.jpg"))
-            setattr(data, "frame_counter", 60)
-            setattr(data, "source_fps", 30)
-            self.detect_component.capture_frame(data)
-            self.detect_component.setObjectName("detect_component")
-            # window 添加widget
-            self.setCentralWidget(self.detect_component)
+    def _capture_test():
+        class testWindow(QMainWindow):
+            def __init__(self, *args, **kwargs):
+                super(testWindow, self).__init__(*args, **kwargs)
+                self.resize(1300, 800)
+                self.detect_component = DetectComponentApp()
+                data = DataPackage()
+                setattr(data, "frame", cv2.imread(r"D:\MyRepo\AbandonedObjectDetect\data\images\bus.jpg"))
+                setattr(data, "frame_counter", 60)
+                setattr(data, "source_fps", 30)
+                self.detect_component.capture_frame(data)
+                self.detect_component.setObjectName("detect_component")
+                # window 添加widget
+                self.setCentralWidget(self.detect_component)
+                item = QListWidgetItem("test", self.detect_component.abandoned_object_ist)
+                self.detect_component.abandoned_object_ist.insertItem(0, item)
+
+        app = QApplication(sys.argv)
+        app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+        window = testWindow()
+        window.show()
+        app.exec_()
 
 
-    app = QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    window = testWindow()
-    window.show()
-    app.exec_()
+    _capture_test()

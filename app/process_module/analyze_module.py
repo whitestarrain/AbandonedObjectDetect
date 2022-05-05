@@ -86,7 +86,7 @@ class TimeSequenceAnalyzeList(object):
 
     def is_need_discard(self, timestamp):
         """
-        当一个物品的时间序列队列不足1/2，同时此时又有1/4次没有检测到，针对遗留物移动出去的情况 todo: 参数调节
+        当一个物品的时间序列队列不足1/2，同时此时又有1/4次没有检测到，针对遗留物移动出去的情况 (参数调节通过factor)
         是为了既不会因为偶尔的遮挡导致跟踪不到，同时可以及时清除无用的物品检测序列
         :param timestamp:
         :return:
@@ -161,7 +161,7 @@ class AbandonedObjectAnalysesModule(BaseModule):
     opencv跟踪，可能会出现过多行李，影响计算速度。
     """
 
-    def __init__(self, skippable=True, analyze_period=5):
+    def __init__(self, add_list_item, skippable=True, analyze_period=5):
         """
 
         :param skippable:
@@ -173,6 +173,7 @@ class AbandonedObjectAnalysesModule(BaseModule):
         self.fps = None
         self.object_pred_seq = list()
         self.frame_skip = 0  # 跳帧操作
+        self.add_list_item_signal = add_list_item
 
     @staticmethod
     def filter_baggage_and_person(data):
@@ -254,8 +255,13 @@ class AbandonedObjectAnalysesModule(BaseModule):
         abandon_objects = []
 
         for seq in self.object_pred_seq:
+            add_item_flag = False
+            if seq.abandoned_judged_timestamp is None:
+                add_item_flag = True
             if seq.is_abandoned_object(pred_person):
                 abandon_objects.append(seq.get_latest_pred())
+                if add_item_flag:
+                    self.add_list_item_signal()
 
         return abandon_objects
 

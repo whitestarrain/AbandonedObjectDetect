@@ -137,7 +137,7 @@
            <item>
             <widget class="QCheckBox" name="show_box">
              <property name="text">
-              <string>显示边框</string>
+              <string>显示行人外实时检测边框</string>
              </property>
              <property name="checked">
               <bool>true</bool>
