@@ -11,7 +11,7 @@ from app.app_component.base_component.widget_component import CaptureListItem
 from app.entry.video_resource import VideoResource
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
-from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule
+from app.process_module.image_detect_module import YoloV5DetectModule, CaptureModule, AbandonedObjectAnalysesModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
 from app.ui_component.detect_component import Ui_DetectComponent
@@ -125,6 +125,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
             self.process_pipe_line = DataProcessPipe() \
                 .set_source_module(VideoModule(source, fps=fps)) \
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
+                .set_next_module(AbandonedObjectAnalysesModule(analyze_period=1)) \
                 .set_next_module(CaptureModule(10, lambda d: self.capture_frame_signal.emit(d))) \
                 .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
             self.process_pipe_line.start()

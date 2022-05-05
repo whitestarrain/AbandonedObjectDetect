@@ -1,2 +1,2 @@
-baggage_classes = ["bag"]
+baggage_classes = ["handbag", "backpack", "suitcase"]
 person_class = ["person"]

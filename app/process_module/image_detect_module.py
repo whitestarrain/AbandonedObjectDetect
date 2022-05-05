@@ -1,7 +1,6 @@
 import json
 import sys
 import time
-from typing import List
 
 import cv2
 import numpy as np
@@ -199,7 +198,7 @@ class CaptureModule(BaseModule):
 
     def process_data(self, data):
         # 之后，这里检测的应该都是行李
-        pred = data.pred
+        pred = data.analyse_result
         fps = data.source_fps
         if self.frame_counter_threshold < 0:
             if fps is not None:
@@ -239,9 +238,9 @@ class TimeSequenceAnalyzeList(object):
         3. 遗留物被移动，判断为非遗留物
     """
 
-    def __init__(self, fps, analyse_period):
+    def __init__(self, fps, analyse_period, factor=1 / 4):
         super(TimeSequenceAnalyzeList, self).__init__()
-        self.factor = 1 / 4
+        self.factor = factor  # 被遮挡超过多长时间后，不会被判断为遗留物
         self.analyse_period = analyse_period
         self.fps = fps
 
@@ -323,9 +322,9 @@ class TimeSequenceAnalyzeList(object):
         if not self.can_analyse():
             return False
 
-        # 0.5s 计算一次移动距离
-        distance_compute_per_frame_num = int(self.fps / 2)
-        i = len(self.pred_list)
+        # 0.1s 计算一次移动距离
+        distance_compute_per_frame_num = int(self.fps / 10)
+        i = len(self.pred_list) - 1
         moving_distance = 0
         while i >= len(self.pred_list) - self.analyze_length + distance_compute_per_frame_num:
             moving_distance += get_point_center_distance(self.pred_list[i],
@@ -340,23 +339,28 @@ class TimeSequenceAnalyzeList(object):
 
         # 如果周围有人，则不为遗留物。除非之前判断为过遗留物
         if self.abandoned_judged_timestamp is not None:
+            self.abandoned_judged_timestamp = time.time()
             return True
 
-        # 计算两个预测框在x与y方向上的最短距离
-        min_person_distance = sys.maxsize
+        # 计算两个预测框在x与y方向上的分别的最短距离
+        min_person_x = sys.maxsize
+        min_person_y = sys.maxsize
         for p in pred_person:
             for i in range(4):
                 if i % 2 == 0:
-                    min_person_distance = min(min_person_distance,
-                                              min(abs(last_pred[i] - p[0]), abs(last_pred[i] - p[2])))
+                    min_person_x = min(min_person_x,
+                                       min(abs(last_pred[i] - p[0]), abs(last_pred[i] - p[2])))
                 else:
-                    min_person_distance = min(min_person_distance,
-                                              min(abs(last_pred[i] - p[1]), abs(last_pred[i] - p[3])))
+                    min_person_y = min(min_person_y,
+                                       min(abs(last_pred[i] - p[1]), abs(last_pred[i] - p[3])))
+        # x和y方向上的最短距离中的较大值
+        min_person_instance = max(min_person_x, min_person_y)
 
         # 和人的距离过近
-        if min_person_distance < max_height_or_width:
+        if min_person_instance < max_height_or_width:
             return False
 
+        self.abandoned_judged_timestamp = time.time()
         return True
 
 
@@ -369,28 +373,35 @@ class AbandonedObjectAnalysesModule(BaseModule):
     """
 
     def __init__(self, skippable=True, analyze_period=5):
+        """
+
+        :param skippable:
+        :param analyze_period: 静止多长时间会被判断为遗留物
+        """
         super(AbandonedObjectAnalysesModule, self).__init__(skippable=skippable)
         self.analyze_period = analyze_period  # 判断为遗留物的时间段
         self.analyze_length = None  # analyze_period  * fps
         self.fps = None
-        self.object_pred_seq = List[TimeSequenceAnalyzeList]()
+        self.object_pred_seq = list()
         self.frame_skip = 0  # 跳帧操作
 
     @staticmethod
-    def filter_baggage_and_person(pred):
+    def filter_baggage_and_person(data):
+        pred = data.pred
         pred_baggage = []
         pred_person = []
         pred = pred[0]  # 取第一张图片检测结果
         dim0 = len(pred)
         for i in range(dim0):
             cls = int(pred[i][5])
-            label = str(pred.names[cls])
+            label = str(data.names[cls])
             if label in baggage_classes:
                 pred_baggage.append(pred[i])
             if label in person_class:
                 pred_person.append(pred[i])
 
-        return np.array(pred_baggage), np.array(pred_person)
+        return np.array([i.numpy() for i in pred_baggage if len(pred_baggage) > 0]), \
+               np.array([i.numpy() for i in pred_person if len(pred_person) > 0])
 
     def put_into_nearest_point(self, pred_baggages):
         """
@@ -411,7 +422,7 @@ class AbandonedObjectAnalysesModule(BaseModule):
         # 同类的遗留物中，根据每帧前后的距离，判断是否是同一物品。两帧之间，物品的距离移动不得超过 一定值
         for baggage_anno in pred_baggages:
             if len(self.object_pred_seq) == 0:
-                seq = TimeSequenceAnalyzeList(self.analyze_length, self.fps, self.analyze_period)
+                seq = TimeSequenceAnalyzeList(self.fps, self.analyze_period)
                 seq.add_pred_item(baggage_anno)
                 self.object_pred_seq.append(seq)
 
@@ -454,6 +465,7 @@ class AbandonedObjectAnalysesModule(BaseModule):
         abandon_objects = []
 
         for seq in self.object_pred_seq:
+            print(len(seq))
             if seq.is_abandoned_object(pred_person):
                 abandon_objects.append(seq.get_latest_pred())
 
@@ -464,7 +476,7 @@ class AbandonedObjectAnalysesModule(BaseModule):
         pred_baggage, pred_person = self.filter_baggage_and_person(data)
 
         if self.fps is None:
-            self.fps = data.fps
+            self.fps = data.source_fps
             self.analyze_length = int(self.fps * self.analyze_period)
 
             self.time_sequence_analyze = LimitQueue(self.analyze_length)

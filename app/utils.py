@@ -1,4 +1,4 @@
-import cmath
+import math
 
 
 def second2str(seconds):
@@ -74,7 +74,11 @@ def get_point_center_distance(p1, p2):
     center2 = (p2[0] + p2[2]) / 2, (p2[1] + p2[3]) / 2
     x_distance = abs(center1[0] - center2[0])
     y_distance = abs(center1[1] - center2[1])
-    return cmath.sqrt(x_distance ^ 2 + y_distance ^ 2)
+    d_sq = x_distance * x_distance + y_distance * y_distance
+    if d_sq == 0:
+        return 0
+    else:
+        return math.sqrt(d_sq)
 
 
 def get_max_distance_in_points(points):
