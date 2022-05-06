@@ -31,7 +31,7 @@ except (ImportError, AssertionError):
     wandb = None
 
 # 禁用wandb
-wandb=None
+# wandb = None
 
 WANDB_ARTIFACT_PREFIX = 'wandb-artifact://'
 
@@ -391,7 +391,8 @@ class WandbLogger():
         """
         # TODO: Explore multiprocessing to slpit this loop parallely| This is essential for speeding up the the logging
         artifact = wandb.Artifact(name=name, type="dataset")
-        img_files = tqdm([dataset.source_path]) if isinstance(dataset.source_path, str) and Path(dataset.source_path).is_dir() else None
+        img_files = tqdm([dataset.source_path]) if isinstance(dataset.source_path, str) and Path(
+            dataset.source_path).is_dir() else None
         img_files = tqdm(dataset.img_files) if not img_files else img_files
         for img_file in img_files:
             if Path(img_file).is_dir():
