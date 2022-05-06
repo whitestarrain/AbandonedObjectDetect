@@ -1,6 +1,6 @@
 classes=8
-train=./data/coco4-train.txt
-valid=./data/coco4-val.txt
-names=data/coco4.names
+train=./datasets/coco4/images/train2017
+valid=./datasets/coco4/images/train2017
+names=data/prune/coco4.names
 backup=backup/
 eval=coco4
