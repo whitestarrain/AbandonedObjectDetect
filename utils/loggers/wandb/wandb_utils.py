@@ -30,6 +30,9 @@ try:
 except (ImportError, AssertionError):
     wandb = None
 
+# 禁用wandb
+wandb=None
+
 WANDB_ARTIFACT_PREFIX = 'wandb-artifact://'
 
 
