@@ -1,0 +1,4 @@
+classes=80
+train=./datasets/coco128/images/train2017
+valid=./datasets/coco128/images/train2017
+names=data/prune/coco128.names

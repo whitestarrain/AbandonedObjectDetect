@@ -1,1 +1,1 @@
-python slim_prune_yolov5s.py --cfg cfg/yolov5s_v6_hand.cfg --data data/oxfordhand.data --weights weights/last_v6s.pt --global_percent 0.5 --layer_keep 0.01 --img_size 640
+python slim_prune_yolov5s.py --cfg cfg/yolov5s_v6_coco4.cfg --data data/prune/coco4.data --weights yolov5s.pt --global_percent 0.5 --layer_keep 0.01 --img_size 640
