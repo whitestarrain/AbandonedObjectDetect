@@ -19,6 +19,7 @@
 *.avi
 *.json
 *.cfg
+*.zip
 !cfg/yolov5*.cfg
 2.4.1'
 
