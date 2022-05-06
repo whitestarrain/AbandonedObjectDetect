@@ -1,1 +1,1 @@
-python train_sparsity.py --img 640 --batch 16 --epochs 50 --data data/coco4.yaml --cfg models/yolov5s.yaml  --name sparsity_test -sr --scale 0.001 --prune 1
+python train_sparsity.py --img 640 --batch 16 --epochs 10 --data data/coco-filter.yaml --cfg models/yolov5s.yaml --weights runs/train/exp4/weights/best.pt  --name sparsity_coco -sr --scale 0.001 --prune 1

@@ -35,7 +35,7 @@ def video_to_img(video_path, output_dir: Path):
     ret, frame = cap.read()
     i = 0
     while ret:
-        cv.imwrite(str(output_dir / ("%012d.jpg" % i)), frame)
+        cv.imwrite(str(output_dir / ("1%011d.jpg" % i)), frame)
         i += 1
         ret, frame = cap.read()
     cap.release()

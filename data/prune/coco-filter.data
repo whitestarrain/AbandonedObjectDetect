@@ -1,0 +1,4 @@
+classes=4
+train=../../datasets/coco/images/train2017
+valid=
+names=./coco-filter.names
