@@ -22,6 +22,7 @@
 *.zip
 *.swp
 !cfg/yolov5*.cfg
+!cfg/prune*.cfg
 2.4.1'
 
 runs/*
