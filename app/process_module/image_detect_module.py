@@ -52,6 +52,7 @@ class YoloV5DetectModule(BaseModule):
                   hide_conf=False,  # hide confidences
                   half=False,  # use FP16 half-precision inference
                   dnn=False,  # use OpenCV DNN for ONNX inference
+                  remote_server=""
                   ):
         self.weights = weights
         self.source = source

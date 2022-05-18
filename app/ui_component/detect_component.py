@@ -256,7 +256,7 @@ class Ui_DetectComponent(object):
         _translate = QtCore.QCoreApplication.translate
         DetectComponent.setWindowTitle(_translate("DetectComponent", "遗留物检测"))
         self.label_10.setText(_translate("DetectComponent", "视频源"))
-        self.video_now_source_path.setText(_translate("DetectComponent", "resource/videos/test.mp4"))
+        self.video_now_source_path.setText(_translate("DetectComponent", ""))
         self.open_source_btn.setText(_translate("DetectComponent", "开启源"))
         self.close_source_btn.setText(_translate("DetectComponent", "关闭源"))
         self.label_11.setText(_translate("DetectComponent", "视频通道"))

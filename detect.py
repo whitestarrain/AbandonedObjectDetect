@@ -34,6 +34,7 @@ from utils.torch_utils import load_classifier, select_device, time_sync
 @torch.no_grad()
 def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         source=ROOT / 'data/images',  # file/dir/URL/glob, 0 for webcam
+        remote_server="",
         imgsz=640,  # inference size (pixels)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
@@ -269,7 +270,8 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
 def parse_opt():
     parser = argparse.ArgumentParser()
     # 预训练模型
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train/exp4/weights/best.pt', help='model path(s)')
+    # parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train/exp4/weights/best.pt', help='model path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train/s_coco_finetune_distill/weights/best.pt', help='model path(s)')
     # 需要检测的图片或视频的路径
     parser.add_argument('--source', type=str, default=ROOT / 'data/images', help='file/dir/URL/glob, 0 for webcam')
     # 检测接口中，图片的大小。太大或太小都会进行处理
@@ -317,6 +319,8 @@ def parse_opt():
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     # 是否使用opencv DNN 加载 onnx
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
+    # 是否使用远程检测服务器
+    parser.add_argument('--remote_server', action='store_true', help='use remote detect server')
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(FILE.stem, opt)
