@@ -271,13 +271,13 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     # 预训练模型
     # parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train/exp4/weights/best.pt', help='model path(s)')
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train/s_coco_finetune_distill/weights/best.pt', help='model path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'runs/train/s_coco-filter_finetune_distill/weights/best.pt', help='model path(s)')
     # 需要检测的图片或视频的路径
     parser.add_argument('--source', type=str, default=ROOT / 'data/images', help='file/dir/URL/glob, 0 for webcam')
     # 检测接口中，图片的大小。太大或太小都会进行处理
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     # 置信度，低于指定概率的框会被删去
-    parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
+    parser.add_argument('--conf-thres', type=float, default=0.5, help='confidence threshold')
     # iou，框重合度大于多少会被删去
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
     # 每张图片最多检测到目标的个数

@@ -69,11 +69,6 @@ class ObjectDetectVisModule(DataDealerModule):
 
     def draw_frame(self, data):
 
-        # 遗留物画框
-        analyse_result = data.analyse_result
-        for arr in analyse_result:
-            draw_box_and_labels(data.frame, int(arr[0]), int(arr[1]), int(arr[2]), int(arr[3]), box_color=(0, 0, 255))
-
         pred = data.pred[0]
         dim0 = len(pred)
         for i in range(dim0):
@@ -89,3 +84,9 @@ class ObjectDetectVisModule(DataDealerModule):
             if label != "person" and not self.show_box:
                 continue
             draw_box_and_labels(data.frame, x1, y1, x2, y2, label, conf)
+
+        # 遗留物画框
+        analyse_result = data.analyse_result
+        for arr in analyse_result:
+            draw_box_and_labels(data.frame, int(arr[0]), int(arr[1]), int(arr[2]), int(arr[3]), box_color=(0, 0, 255))
+

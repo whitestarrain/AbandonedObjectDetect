@@ -27,11 +27,13 @@ class TimeSequenceAnalyzeList(object):
         3. 遗留物被移动，判断为非遗留物
     """
 
-    def __init__(self, fps, analyse_period, factor=1 / 4):
+    def __init__(self, fps, analyse_period, factor=1 / 4, max_movement_factor=1, distance_calculate_time_interval=0.1):
         super(TimeSequenceAnalyzeList, self).__init__()
         self.factor = factor  # 被遮挡超过多长时间后，不会被判断为遗留物
         self.analyse_period = analyse_period
         self.fps = fps
+        self.max_movement_factor = max_movement_factor  # 最长移动距离因数
+        self.distance_calculate_time_interval = distance_calculate_time_interval  # 对象移动距离计算间隔
 
         # 此处多了个factor，一般使用后 analyze_length帧，即[factor * analyse_length:]
         # 如果遗留物被遮挡，检测不到的时候，会开始pop。 此时分析则是通过[m:buffer_length-m](m<factor * analyze_length)
@@ -111,8 +113,8 @@ class TimeSequenceAnalyzeList(object):
         if not self.can_analyse():
             return False
 
-        # 0.1s 计算一次移动距离
-        distance_compute_per_frame_num = int(self.fps / 10)
+        # 默认0.1s 计算一次移动距离
+        distance_compute_per_frame_num = int(self.fps * self.distance_calculate_time_interval)
         i = len(self.pred_list) - 1
         moving_distance = 0
         while i >= len(self.pred_list) - self.analyze_length + distance_compute_per_frame_num:
@@ -123,7 +125,9 @@ class TimeSequenceAnalyzeList(object):
         last_pred = self.get_latest_pred()
 
         max_height_or_width = max(abs(last_pred[0] - last_pred[2]), abs(last_pred[1] - last_pred[3]))
-        if moving_distance > max_height_or_width:
+
+        # 移动距离过大
+        if moving_distance > max_height_or_width * self.max_movement_factor:
             return False
 
         # 如果周围有人，则不为遗留物。除非之前判断为过遗留物
