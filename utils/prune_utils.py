@@ -148,7 +148,7 @@ class BNOptimizer():
     @staticmethod
     def updateBN(sr_flag, module_list, s, prune_idx, epoch, idx2mask=None, opt=None):
         if sr_flag:
-            # s = s if epoch <= opt.epochs * 0.5 else s * 0.01
+            s = s if epoch <= opt.epochs * 0.5 else s * 0.01
             for idx in prune_idx:
                 # Squential(Conv, BN, Lrelu)
                 bn_module = module_list[idx][1]
@@ -162,7 +162,7 @@ class BNOptimizer():
     @staticmethod
     def updateBN_scaler(sr_flag, module_list, s, prune_idx, epoch,scaler, idx2mask=None, opt=None):
         if sr_flag:
-            # s = s if epoch <= opt.epochs * 0.5 else s * 0.01
+            s = s if epoch <= opt.epochs * 0.5 else s * 0.01
             for idx in prune_idx:
                 # Squential(Conv, BN, Lrelu)
                 # bn_module = module_list[idx][1]

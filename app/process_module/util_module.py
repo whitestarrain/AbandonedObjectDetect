@@ -12,7 +12,6 @@ class CaptureModule(BaseModule):
         self.capture_frame_function = capture_frame_function
 
     def process_data(self, data):
-        # 之后，这里检测的应该都是行李
         pred = data.analyse_result
         fps = data.source_fps
         if self.frame_counter_threshold < 0:
