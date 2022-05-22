@@ -1,4 +1,9 @@
+import os
+
 from app.process_module.base.base_module import *
+from app.process_module.base.stage import StageDataStatus
+import cv2
+import time
 
 
 class CaptureModule(BaseModule):
@@ -32,3 +37,36 @@ class CaptureModule(BaseModule):
 
     def pre_run(self):
         super(CaptureModule, self).pre_run()
+
+
+class VideoSaveModule(BaseModule):
+    def __init__(self, app, out_dir, fps):
+        super(VideoSaveModule, self).__init__()
+        self.out = None
+        self.fourcc = None
+        self.frame = None
+        self.fps = fps
+        self.out_dir = out_dir
+
+    def process_data(self, data):
+        if data is None:
+            return
+        frame = data.frame
+        height = len(frame)
+        width = len(frame[0])
+        if self.out is None:
+            self.out = cv2.VideoWriter(str(os.path.join(self.out_dir, str(time.time()))) + ".avi", self.fourcc,
+                                       data.fps, (height, width))
+        self.out.write(frame)
+        return StageDataStatus.STAGE_DATA_OK
+
+    def close(self):
+        self.out.release()
+
+    def pre_run(self):
+        super(VideoSaveModule, self).pre_run()
+
+        if self.out is not None:
+            self.out.release()
+
+        self.fourcc = cv2.VideoWriter_fourcc(*'DIVX')
