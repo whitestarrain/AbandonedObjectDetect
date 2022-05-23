@@ -5,10 +5,10 @@ from app.process_module.base.stage import *
 from app.process_module.base.stage import StageDataStatus
 
 
-class VideoModule(BaseModule):
+class VideoSourceModule(BaseModule):
 
     def __init__(self, source=0, fps=25, skippable=False):
-        super(VideoModule, self).__init__(skippable=skippable)
+        super(VideoSourceModule, self).__init__(skippable=skippable)
         self.frame_counter = 0
         self.stage_node = None  # DataProcessPipe中初始化
         self.source = source
@@ -46,7 +46,7 @@ class VideoModule(BaseModule):
         super().close()
 
     def pre_run(self):
-        super(VideoModule, self).pre_run()
+        super(VideoSourceModule, self).pre_run()
         if self.cap is not None:
             self.cap.release()
         self.cap = cv2.VideoCapture(self.source)

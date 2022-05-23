@@ -62,6 +62,7 @@ class VideoSaveModule(BaseModule):
 
     def close(self):
         self.out.release()
+        self.running = False
 
     def pre_run(self):
         super(VideoSaveModule, self).pre_run()

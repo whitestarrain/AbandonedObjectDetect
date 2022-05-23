@@ -127,7 +127,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         def open_source_func(self):
             fps = 12
             self.process_pipe_line = DataProcessPipe() \
-                .set_source_module(VideoModule(source, fps=fps)) \
+                .set_source_module(VideoSourceModule(source, fps=fps)) \
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
                 .set_next_module(AbandonedObjectAnalysesModule(lambda: self.abandoned_object_list_add_signal.emit(),
                                                                analyze_period=1)) \
