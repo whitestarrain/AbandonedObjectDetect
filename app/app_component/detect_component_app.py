@@ -13,7 +13,7 @@ from app.process_module.analyze_module import AbandonedObjectAnalysesModule
 from app.process_module.base.base_module import *
 from app.process_module.base.data_process_pipe import *
 from app.process_module.image_detect_module import YoloV5DetectModule
-from app.process_module.util_module import CaptureModule
+from app.process_module.util_module import CaptureModule,VideoSaveModule
 from app.process_module.vis_modules import ObjectDetectVisModule
 from app.service.video_resource_service import VideoResourceService
 from app.ui_component.detect_component import Ui_DetectComponent
@@ -131,8 +131,9 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
                 .set_next_module(YoloV5DetectModule(skippable=False)) \
                 .set_next_module(AbandonedObjectAnalysesModule(lambda: self.abandoned_object_list_add_signal.emit(),
                                                                analyze_period=1)) \
-                .set_next_module(CaptureModule(10, lambda d: self.capture_frame_signal.emit(d))) \
-                .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d)))
+                .set_next_module(CaptureModule(1, lambda d: self.capture_frame_signal.emit(d))) \
+                .set_next_module(ObjectDetectVisModule(lambda d: self.push_frame_signal.emit(d))) \
+                # .set_next_module(VideoSaveModule("D:/"))
             self.process_pipe_line.start()
             self.open_source_lock.release()
 

@@ -40,7 +40,7 @@ class CaptureModule(BaseModule):
 
 
 class VideoSaveModule(BaseModule):
-    def __init__(self, app, out_dir, fps):
+    def __init__(self,out_dir, fps=30):
         super(VideoSaveModule, self).__init__()
         self.out = None
         self.fourcc = None
@@ -56,7 +56,7 @@ class VideoSaveModule(BaseModule):
         width = len(frame[0])
         if self.out is None:
             self.out = cv2.VideoWriter(str(os.path.join(self.out_dir, str(time.time()))) + ".avi", self.fourcc,
-                                       data.fps, (height, width))
+                                       self.fps, (width, height))
         self.out.write(frame)
         return StageDataStatus.STAGE_DATA_OK
 
