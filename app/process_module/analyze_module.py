@@ -246,8 +246,15 @@ class AbandonedObjectAnalysesModule(BaseModule):
                 # 否则，最近的存入time_sequence_analyze
                 self.object_pred_seq[nearest_index].add_pred_item(baggage_anno)
 
+        if len(self.object_pred_seq) == 0:
+            return
+
         for i in range(len(self.object_pred_seq)):
-            seq = self.object_pred_seq[i]
+            try:
+                # 多线程处理，此处可能会为有out of index 错误
+                seq = self.object_pred_seq[i]
+            except Exception as e:
+                return
             if seq.is_need_discard(timestamp):
                 self.object_pred_seq.pop(i)
 
