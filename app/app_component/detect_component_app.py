@@ -55,6 +55,7 @@ class DetectComponentApp(QWidget, Ui_DetectComponent):
         open_source -> 通过emit把module处理过后的数据发送到 push_frame
         push_frame 把图片存到内存(frame_data_list)， 然后设置进度条最大和最小值。
         进度条 从 -1 变为0 ，触发change_frame,change_frame 中循环触发change_frame
+        TODO: 从视频文件中动态加载(查一下视频播放器的实现吧)
 
         :return:
         """
